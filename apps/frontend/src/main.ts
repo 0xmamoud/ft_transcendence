@@ -1,47 +1,20 @@
 import Router from "./core/router";
+import { BaseComponent, ParamsBaseComponent } from "./core/baseComponent";
 
-class HomePage extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
-
-  connectedCallback() {
-    this.render();
-  }
-
+class HomePage extends BaseComponent {
   render() {
     this.shadowRoot!.innerHTML = `<div>welcome to home page</div>`;
   }
-
 }
 
-class AboutPage extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
-
-  connectedCallback() {
-    this.render();
-  }
-
+class AboutPage extends BaseComponent {
   render() {
     this.shadowRoot!.innerHTML = `<div>welcome to about page</div>`;
   }
 
 }
 
-class ContactPage extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
-
-  connectedCallback() {
-    this.render();
-  }
-
+class ContactPage extends BaseComponent {
   render() {
     this.shadowRoot!.innerHTML = `<div>welcome to contact page</div>`;
   }
@@ -49,34 +22,7 @@ class ContactPage extends HTMLElement {
 }
 
 
-class PostPage extends HTMLElement {
-  declare params: Record<string, string>;
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
-
-  connectedCallback() {
-    this.updateParams();
-    this.render();
-  }
-
-  static get observedAttributes() {
-    return ["params"];
-  }
-
-  attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
-    if (name === "params") {
-      this.updateParams();
-      this.render();
-    }
-  }
-
-  updateParams() {
-    const params = JSON.parse(this.getAttribute("params")!);
-    this.params = params;
-  }
-
+class PostPage extends ParamsBaseComponent {
   render() {
     this.shadowRoot!.innerHTML = `<div>
       welcome to post page ${this.params.id}
@@ -85,34 +31,7 @@ class PostPage extends HTMLElement {
 
 }
 
-class UserPage extends HTMLElement {
-  declare params: Record<string, string>;
-  constructor() {
-    super();
-    this.attachShadow({ mode: "open" });
-  }
-
-  connectedCallback() {
-    this.updateParams();
-    this.render();
-  }
-
-  static get observedAttributes() {
-    return ["params"];
-  }
-
-  attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
-    if (name === "params" && newValue) {
-      this.updateParams();
-      this.render();
-    }
-  }
-
-  updateParams() {
-    const params = JSON.parse(this.getAttribute("params")!);
-    this.params = params;
-  }
-
+class UserPage extends ParamsBaseComponent {
   render() {
     this.shadowRoot!.innerHTML = `<div>
       welcome to user page ${this.params.id} ${this.params.name}
@@ -150,4 +69,4 @@ const routes = [
   },
 ];
 
-const router = new Router(routes);
+export const router = new Router(routes);

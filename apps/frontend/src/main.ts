@@ -1,5 +1,6 @@
 import Router from "./core/router";
 import { BaseComponent, ParamsBaseComponent } from "./core/baseComponent";
+import StarryBackground from "./features/shared/starryBackground";
 
 class HomePage extends BaseComponent {
   render() {
@@ -70,3 +71,5 @@ const routes = [
 ];
 
 export const router = new Router(routes);
+const starryBackground = new StarryBackground();
+

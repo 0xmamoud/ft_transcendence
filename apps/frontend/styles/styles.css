@@ -1,0 +1,74 @@
+@import url("./starrybackground.css");
+
+:root {
+  /* Colors */
+  --bg-gradient-start: #1b2735;
+  --bg-gradient-end: #090a0f;
+  --star-color: #fff;
+  --text-color: #fff;
+  --text-gradient-start: white;
+  --text-gradient-end: #38495a;
+
+  /* Star Properties */
+  --star-size-small: 1px;
+  --star-size-medium: 2px;
+  --star-size-large: 3px;
+
+  /* Animation Durations */
+  --animation-speed-slow: 150s;
+  --animation-speed-medium: 100s;
+  --animation-speed-fast: 50s;
+
+  /* Z-indices */
+  --z-index-stars: 0;
+  --z-index-content: 1;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(
+    ellipse at bottom,
+    var(--bg-gradient-start) 0%,
+    var(--bg-gradient-end) 100%
+  );
+  overflow-x: hidden;
+}
+
+/* App container styles */
+#app {
+  position: relative;
+  z-index: var(--z-index-content);
+  color: var(--text-color);
+}
+
+/* Bootstrap overrides for dark theme */
+.navbar {
+  background-color: var(--navbar-bg) !important;
+  backdrop-filter: blur(var(--navbar-blur));
+}
+
+.navbar-brand,
+.nav-link {
+  color: var(--text-color) !important;
+}
+
+.nav-link:hover {
+  color: rgba(255, 255, 255, var(--navbar-link-hover-opacity)) !important;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --title-font-size: 30px;
+    --title-letter-spacing: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --title-font-size: 24px;
+    --title-letter-spacing: 3px;
+  }
+}

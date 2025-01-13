@@ -1,4 +1,5 @@
 @import url("./starrybackground.css");
+@import url("./navbar.css");
 
 :root {
   /* Colors */
@@ -8,6 +9,15 @@
   --text-color: #fff;
   --text-gradient-start: white;
   --text-gradient-end: #38495a;
+
+  /* Font Properties */
+  --title-font: "Lato", sans-serif;
+  --title-font-weight: 300;
+  --title-font-size: 50px;
+  --title-letter-spacing: 10px;
+  --paragraph-font: "Inter", sans-serif;
+  --paragraph-font-weight: 300;
+  --paragraph-font-size: 20px;
 
   /* Star Properties */
   --star-size-small: 1px;
@@ -22,13 +32,27 @@
   /* Z-indices */
   --z-index-stars: 0;
   --z-index-content: 1;
+
+  /* Glass Effect */
+  --glass-bg-rgb: 27, 39, 53;
+  --glass-bg-opacity: 0.8;
+  --glass-border-color-rgb: 255, 255, 255;
+  --glass-border-opacity: 0.1;
+  --glass-blur: 12px;
+  --glass-radius: 50px;
+  --glass-hover-bg-opacity: 0.1;
+  --glass-hover-radius: 15px;
 }
 
 html,
 body {
+  color: var(--text-color);
   height: 100%;
   margin: 0;
   padding: 0;
+  padding-top: 10px;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
   background: radial-gradient(
     ellipse at bottom,
     var(--bg-gradient-start) 0%,
@@ -42,33 +66,26 @@ body {
   position: relative;
   z-index: var(--z-index-content);
   color: var(--text-color);
-}
-
-/* Bootstrap overrides for dark theme */
-.navbar {
-  background-color: var(--navbar-bg) !important;
-  backdrop-filter: blur(var(--navbar-blur));
-}
-
-.navbar-brand,
-.nav-link {
-  color: var(--text-color) !important;
-}
-
-.nav-link:hover {
-  color: rgba(255, 255, 255, var(--navbar-link-hover-opacity)) !important;
+  font-family: var(--paragraph-font);
 }
 
 @media (max-width: 768px) {
   :root {
     --title-font-size: 30px;
     --title-letter-spacing: 5px;
+    --paragraph-font-size: 16px;
   }
+}
+
+.max-container {
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
 @media (max-width: 480px) {
   :root {
     --title-font-size: 24px;
     --title-letter-spacing: 3px;
+    --paragraph-font-size: 14px;
   }
 }

@@ -3,8 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css?family=Lato:300,400,700"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles/styles.css" />
@@ -17,6 +19,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ft_transcendence</title>
   </head>
+
   <body>
     <div class="stars-container">
       <div id="stars1"></div>
@@ -24,21 +27,44 @@
       <div id="stars3"></div>
     </div>
 
-    <nav>
-      <ul>
-        <li><a href="/" data-link>Home</a></li>
-        <li><a href="/about" data-link>About</a></li>
-        <li><a href="/contact" data-link>Contact</a></li>
-        <li>
-          <a href="/posts/1" data-link>Post</a>
-        </li>
-        <li>
-          <a href="/users/2/mamoud" data-link>Edit Post</a>
-        </li>
-      </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top glass-navbar">
+      <div class="container-fluid">
+        <button
+          class="navbar-toggler ms-auto"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarTogglerDemo01"
+          aria-controls="navbarTogglerDemo01"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="/" data-link>Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/game" data-link>Play</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile" data-link>Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/leaderboard" data-link>Leaderboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/login" data-link>Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/signup" data-link>Sign up</a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav>
-    <h1>ft_transcendence</h1>
-    <p>hello world 3</p>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
     <script

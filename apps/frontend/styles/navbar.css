@@ -1,0 +1,45 @@
+.glass-navbar {
+  font-family: var(--title-font);
+  background-color: rgba(
+    var(--glass-bg-rgb),
+    var(--glass-bg-opacity)
+  ) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur)); /* Safari support */
+  margin: 0 auto;
+  padding: 20px 10px !important;
+  width: fit-content;
+  border: 1px solid
+    rgba(var(--glass-border-color-rgb), var(--glass-border-opacity));
+  border-radius: 50px;
+}
+
+.glass-navbar .nav-link {
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.glass-navbar .nav-link:hover {
+  color: var(--text-color);
+  background-color: rgba(
+    var(--glass-border-color-rgb),
+    var(--glass-hover-bg-opacity)
+  );
+  border-radius: 15px;
+  padding: 3px 15px;
+}
+
+@media (max-width: 768px) {
+  .glass-navbar {
+    width: 90%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    width: 90%;
+    padding: 10px !important;
+    border-radius: 25px;
+  }
+}

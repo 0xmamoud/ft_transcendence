@@ -6,11 +6,13 @@ class HomePage extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot!.innerHTML = `
-      <div class="home-page">
-        <h1>Home Page</h1>
-        <p>Welcome to the home page!</p>
-      </div>
+    this.innerHTML = `
+      <section >
+        <div >
+          <h1>Home page</h1>
+          <p>Welcome to the home page!</p>
+        </div> 
+      </section>
     `;
   }
 }

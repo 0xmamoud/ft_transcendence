@@ -6,7 +6,7 @@ class ProfilePage extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot!.innerHTML = `
+    this.innerHTML = `
       <div class="profile-page">
         <h1>Profile Page</h1>
         <p>Welcome to the profile page!</p>

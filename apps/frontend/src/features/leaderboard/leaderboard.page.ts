@@ -6,7 +6,7 @@ class LeaderboardPage extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot!.innerHTML = `
+    this.innerHTML = `
       <div class="leaderboard-page">
         <h1>Leaderboard Page</h1>
         <p>Welcome to the leaderboard page!</p>

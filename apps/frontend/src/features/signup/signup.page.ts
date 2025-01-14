@@ -6,7 +6,7 @@ class SignupPage extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot!.innerHTML = `
+    this.innerHTML = `
       <div class="signup-page">
         <h1>Signup Page</h1>
         <p>Welcome to the signup page!</p>

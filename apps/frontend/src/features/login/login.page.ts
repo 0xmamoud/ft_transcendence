@@ -6,7 +6,7 @@ class LoginPage extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot!.innerHTML = `
+    this.innerHTML = `
       <div class="login-page">
         <h1>Login Page</h1>
         <p>Welcome to the login page!</p>

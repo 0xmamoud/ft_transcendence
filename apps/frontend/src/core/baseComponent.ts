@@ -1,7 +1,8 @@
+import SharedStyles from "./sharedStyles";
+
 export class BaseComponent extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -15,6 +16,10 @@ export class BaseComponent extends HTMLElement {
 
 export class ParamsBaseComponent extends BaseComponent {
   declare params: Record<string, string>;
+
+  constructor() {
+    super();
+  }
 
   static get observedAttributes() {
     return ["params"];
@@ -41,6 +46,10 @@ export class ParamsBaseComponent extends BaseComponent {
 
 export class PropsBaseComponent extends BaseComponent {
   declare props: Record<string, string>;
+
+  constructor() {
+    super();
+  }
 
   static get observedAttributes() {
     return ["props"];

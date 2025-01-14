@@ -6,7 +6,7 @@ class GamePage extends BaseComponent {
   }
 
   render() {
-    this.shadowRoot!.innerHTML = `
+    this.innerHTML = `
       <div class="game-page">
         <h1>Game Page</h1>
         <p>Welcome to the game page!</p>

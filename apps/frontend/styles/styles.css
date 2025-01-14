@@ -82,6 +82,11 @@ body {
   margin: 0 auto;
 }
 
+.hero {
+  text-align: center;
+  background: red;
+}
+
 @media (max-width: 480px) {
   :root {
     --title-font-size: 24px;

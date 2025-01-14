@@ -63,6 +63,17 @@
   transform: scale(0.95);
 }
 
+.home_image_container {
+  margin: 70px auto !important;
+}
+
+.home_image {
+  border: 1px solid
+    rgba(var(--glass-border-color-rgb), var(--glass-border-opacity));
+  border-radius: 30px;
+  box-shadow: 0 0 10px rgba(var(--glass-border-color-rgb), 0.5);
+}
+
 @media (max-width: 768px) {
   .hero_cta {
     margin: 20px auto;
@@ -76,5 +87,14 @@
   .try_btn,
   .join_btn {
     box-shadow: 0 0 3px rgba(var(--glass-border-color-rgb), 0.5);
+  }
+
+  .home_image_container {
+    margin: 50px auto !important;
+    width: 95%;
+  }
+
+  .home_image {
+    border-radius: 10px;
   }
 }

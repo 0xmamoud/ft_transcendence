@@ -32,7 +32,7 @@ class HomePage extends BaseComponent {
         <section class="max-container home_image_container">
           <img 
             srcset="https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 320w, https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 400w, https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 450w, https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 640w, https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 700w, https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 800w, https://cdn.dribbble.com/users/728843/screenshots/2019841/media/9ede3a2e951fcfeecf62919f19bd0397.gif 768w" 
-            class="img-fluid" alt="pong challenge demo">
+            class="img-fluid max-container home_image" alt="pong challenge demo">
         </section>
       </section>
     `;

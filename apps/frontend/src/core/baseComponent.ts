@@ -1,4 +1,3 @@
-import SharedStyles from "./sharedStyles";
 
 export class BaseComponent extends HTMLElement {
   constructor() {

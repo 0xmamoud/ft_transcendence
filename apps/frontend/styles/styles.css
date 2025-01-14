@@ -1,5 +1,6 @@
 @import url("./starrybackground.css");
 @import url("./navbar.css");
+@import url("./home.css");
 
 :root {
   /* Colors */
@@ -61,12 +62,46 @@ body {
   overflow-x: hidden;
 }
 
-/* App container styles */
 #app {
   position: relative;
   z-index: var(--z-index-content);
-  color: var(--text-color);
   font-family: var(--paragraph-font);
+  color: var(--text-color);
+}
+
+.max-container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  padding: 20px 0;
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  font-size: var(--title-font-size);
+  letter-spacing: var(--title-letter-spacing);
+  background: -webkit-linear-gradient(
+    var(--text-gradient-start),
+    var(--text-gradient-end)
+  );
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 {
+  text-align: center;
+  margin: 10px 0;
+  font-family: var(--title-font);
+  font-weight: var(--title-font-weight);
+  font-size: var(--title-font-size);
+  letter-spacing: var(--title-letter-spacing);
+  background: -webkit-linear-gradient(
+    var(--text-gradient-start),
+    var(--text-gradient-end)
+  );
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 @media (max-width: 768px) {
@@ -75,16 +110,6 @@ body {
     --title-letter-spacing: 5px;
     --paragraph-font-size: 16px;
   }
-}
-
-.max-container {
-  max-width: 1440px;
-  margin: 0 auto;
-}
-
-.hero {
-  text-align: center;
-  background: red;
 }
 
 @media (max-width: 480px) {

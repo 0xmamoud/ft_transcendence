@@ -7,7 +7,7 @@ interface StarConfig {
 
 class StarryBackground {
   private readonly containers: string[] = ['stars1', 'stars2', 'stars3'];
-  private readonly starCounts: number[] = [700, 200, 100];
+  private readonly starCounts: number[] = [500, 100, 50];
   private resizeTimeout: number | null = null;
 
   constructor() {

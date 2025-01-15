@@ -67,7 +67,7 @@ class LoginPage extends BaseComponent {
               </div>
               <p class="text-center mt-3" >Or</p>
               <div class="d-grid">
-                <button type="button" class="btn btn-secondary" id="login" >Sign Up with 42</button>
+                <button type="button" class="btn btn-secondary" id="login" >Login with 42</button>
                </div>
             </form>
             <div class="text-center mt-3">

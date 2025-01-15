@@ -1,1 +1,1 @@
-console.log("constant.js");
+export const apiURL = "http://localhost:3000";

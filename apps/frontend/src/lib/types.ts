@@ -38,8 +38,8 @@ export interface LeaderboardServiceInterface {
     username: string;
     totalGames: number;
     wins: number;
-  }>;
-  getUserProfile(): Promise<GameHistory[]>;
+  }[]>;
+  getUserProfile(userId: string): Promise<GameHistory[]>;
 }
 
 export interface GameServiceInterface {

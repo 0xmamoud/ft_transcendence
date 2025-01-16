@@ -10,91 +10,67 @@ class UserService implements UserServiceInterface {
   sessionURL = `${apiURL}/me`;
 
   async login(email: string, password: string) {
-    try {
-      const response = await fetch(this.loginURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const response = await fetch(this.loginURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to login");
-      }
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      throw new Error("Failed to login");
     }
   }
 
   async signup(email: string, password: string) {
-    try {
-      const response = await fetch(this.signupURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const response = await fetch(this.signupURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to signup");
-      }
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      throw new Error("Failed to signup");
     }
   }
 
   async oauth() {
-    try {
-      const response = await fetch(this.oauthURL);
+    const response = await fetch(this.oauthURL);
 
-      if (!response.ok) {
-        throw new Error("Failed to oauth");
-      }
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      throw new Error("Failed to oauth");
     }
   }
 
   async logout() {
-    try {
-      const response = await fetch(this.logoutURL);
+    const response = await fetch(this.logoutURL);
 
-      if (!response.ok) {
-        throw new Error("Failed to logout");
-      }
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      throw new Error("Failed to logout");
     }
   }
 
   async getUserProfile() {
-    try {
-      const response = await fetch(this.sessionURL);
+    const response = await fetch(this.sessionURL);
 
-      if (!response.ok) {
-        throw new Error("Failed to get user profile");
-      }
-
-      return response.json();
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      throw new Error("Failed to get user profile");
     }
+
+    return response.json();
   }
 
   async getSession() {
-    try {
-      const response = await fetch(this.profileURL);
+    const response = await fetch(this.profileURL);
 
-      if (!response.ok) {
-        throw new Error("Failed to get session");
-      }
-
-      return response.json();
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      throw new Error("Failed to get session");
     }
+
+    return response.json();
   }
 }
 

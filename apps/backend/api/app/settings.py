@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "authentification.apps.AuthentificationConfig",
     "game.apps.GameConfig",
     "leaderboard.apps.LeaderboardConfig",
+    "tournament.apps.TournamentConfig",
 ]
 
 AUTH_USER_MODEL = "authentification.CustomUser"

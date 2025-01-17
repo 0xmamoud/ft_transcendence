@@ -24,4 +24,5 @@ urlpatterns = [
     path("auth/", include("authentification.urls")),
     path("leaderboard/", include("leaderboard.urls")),
     path("game/", include("game.urls")),
+    path("", include("tournament.urls")),
 ]

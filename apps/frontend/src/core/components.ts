@@ -12,33 +12,38 @@ export class BaseComponent extends HTMLElement {
   }
 }
 
-export class ParamsBaseComponent extends BaseComponent {
-  declare params: Record<string, string>;
+export abstract class AttributeBaseComponent<
+  T extends Record<string, unknown>
+> extends BaseComponent {
+  protected declare data: T;
+  protected abstract readonly attributeName: string;
 
-  constructor() {
-    super();
+  protected updateData() {
+    const value = this.getAttribute(this.attributeName);
+    if (!value) return;
+    this.data = JSON.parse(value);
   }
+}
 
-  static get observedAttributes() {
-    return ["params"];
+export class ParamsBaseComponent extends AttributeBaseComponent<
+  Record<string, string>
+> {
+  protected readonly attributeName = "params";
+
+  get params() {
+    return this.data;
   }
 
   connectedCallback() {
-    this.updateParams();
+    this.updateData();
     this.render();
   }
 
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
-    if (name === "params" && newValue) {
-      this.updateParams();
+    if (name === this.attributeName && newValue) {
+      this.updateData();
       this.render();
     }
-  }
-
-  updateParams() {
-    const params = this.getAttribute("params");
-    if (!params) return;
-    this.params = JSON.parse(params);
   }
 }
 

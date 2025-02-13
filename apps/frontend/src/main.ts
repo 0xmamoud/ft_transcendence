@@ -1,3 +1,6 @@
-import "./style.css";
+import "@/style.css";
+import { SparklesCore } from "@/features/shared/particle";
 
-console.log("Hello World");
+document.addEventListener("DOMContentLoaded", () => {
+  new SparklesCore("sparklesCanvas");
+});

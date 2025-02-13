@@ -4,6 +4,15 @@
 :root {
   --font-poppins: "Poppins", sans-serif;
   --font-inter: "Inter", sans-serif;
+
+  --background: hsl(224 71.4% 4.1%);
+  --foreground: hsl(210 20% 98%);
+
+  --primary: hsl(263.4 70% 50.4%);
+  --secondary: hsl(215 27.9% 16.9%);
+  --destructive: hsl(0 62.8% 30.6%);
+
+  --radius: 0.5rem;
 }
 
 * {
@@ -28,6 +37,17 @@ h6 {
 @theme inline {
   --font-poppins: var(--font-poppins);
   --font-inter: var(--font-inter);
+
+  --background: var(--background);
+  --foreground: var(--foreground);
+
+  --primary: var(--primary);
+  --secondary: var(--secondary);
+  --destructive: var(--destructive);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
 @layer base {
@@ -54,30 +74,14 @@ h6 {
 
 @layer utilities {
   .padding {
-    @apply sm:px-16 px-8 sm:py-24 py-12;
+    @apply px-4 py-8 sm:px-8 sm:py-12 lg:px-16 lg:py-16;
   }
 
   .padding-x {
-    @apply sm:px-16 px-8;
+    @apply px-4 sm:px-8 lg:px-16;
   }
 
   .padding-y {
-    @apply sm:py-24 py-12;
-  }
-
-  .padding-l {
-    @apply sm:pl-16 pl-8;
-  }
-
-  .padding-r {
-    @apply sm:pr-16 pr-8;
-  }
-
-  .padding-t {
-    @apply sm:pt-24 pt-12;
-  }
-
-  .padding-b {
-    @apply sm:pb-24 pb-12;
+    @apply py-8 sm:py-12 lg:py-16;
   }
 }

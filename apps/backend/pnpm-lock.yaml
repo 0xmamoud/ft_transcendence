@@ -8,6 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@fastify/cookie':
+        specifier: ^11.0.2
+        version: 11.0.2
+      '@fastify/cors':
+        specifier: ^10.0.2
+        version: 10.0.2
+      '@fastify/env':
+        specifier: ^5.0.2
+        version: 5.0.2
       '@fastify/jwt':
         specifier: ^9.0.4
         version: 9.0.4
@@ -189,6 +198,15 @@ packages:
   '@fastify/ajv-compiler@4.0.2':
     resolution: {integrity: sha512-Rkiu/8wIjpsf46Rr+Fitd3HRP+VsxUFDDeag0hs9L0ksfnwx2g7SPQQTFL0E8Qv+rfXzQOxBJnjUB9ITUDjfWQ==}
 
+  '@fastify/cookie@11.0.2':
+    resolution: {integrity: sha512-GWdwdGlgJxyvNv+QcKiGNevSspMQXncjMZ1J8IvuDQk0jvkzgWWZFNC2En3s+nHndZBGV8IbLwOI/sxCZw/mzA==}
+
+  '@fastify/cors@10.0.2':
+    resolution: {integrity: sha512-DGdxOG36sS/tZv1NFiCJGi7wGuXOSPL2CmNX5PbOVKx0C6LuIALRMrqLByHTCcX1Rbl8NJ9IWlJex32bzydvlw==}
+
+  '@fastify/env@5.0.2':
+    resolution: {integrity: sha512-4m/jHS3s/G/DBJVODob9sxGUei/Ij8JFbA2PYqBfoihTm+Qqae2xD9xhez68UFZu1d4SNJPIb6uAOwbNvRYw+A==}
+
   '@fastify/error@4.0.0':
     resolution: {integrity: sha512-OO/SA8As24JtT1usTUTKgGH7uLvhfwZPwlptRi2Dp5P4KKmJI3gvsZ8MIHnNwDs4sLf/aai5LzTyl66xr7qMxA==}
 
@@ -282,6 +300,14 @@ packages:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
 
+  dotenv-expand@10.0.0:
+    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
+
+  dotenv@16.4.7:
+    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+    engines: {node: '>=12'}
+
   duplexify@4.1.3:
     resolution: {integrity: sha512-M3BmBhwJRZsSx38lZyhE53Csddgzl5R7xGJNk7CVddZD6CcmwMCH8J+7AprIrQKH7TonKxaCjcv27Qmf+sQ+oA==}
 
@@ -290,6 +316,9 @@ packages:
 
   end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
+
+  env-schema@6.0.1:
+    resolution: {integrity: sha512-WRD40Q25pP4NUbI3g3CNU5PPzcaiX7YYcPwiCZlfR4qGsKmTlckRixgHww0/fOXiXSNKA87pwshzq0ULTK/48A==}
 
   esbuild@0.23.1:
     resolution: {integrity: sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==}
@@ -596,6 +625,21 @@ snapshots:
       ajv-formats: 3.0.1(ajv@8.17.1)
       fast-uri: 3.0.6
 
+  '@fastify/cookie@11.0.2':
+    dependencies:
+      cookie: 1.0.2
+      fastify-plugin: 5.0.1
+
+  '@fastify/cors@10.0.2':
+    dependencies:
+      fastify-plugin: 5.0.1
+      mnemonist: 0.39.8
+
+  '@fastify/env@5.0.2':
+    dependencies:
+      env-schema: 6.0.1
+      fastify-plugin: 5.0.1
+
   '@fastify/error@4.0.0': {}
 
   '@fastify/fast-json-stringify-compiler@5.0.2':
@@ -699,6 +743,10 @@ snapshots:
 
   dequal@2.0.3: {}
 
+  dotenv-expand@10.0.0: {}
+
+  dotenv@16.4.7: {}
+
   duplexify@4.1.3:
     dependencies:
       end-of-stream: 1.4.4
@@ -713,6 +761,12 @@ snapshots:
   end-of-stream@1.4.4:
     dependencies:
       once: 1.4.0
+
+  env-schema@6.0.1:
+    dependencies:
+      ajv: 8.17.1
+      dotenv: 16.4.7
+      dotenv-expand: 10.0.0
 
   esbuild@0.23.1:
     optionalDependencies:

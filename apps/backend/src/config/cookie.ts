@@ -1,0 +1,17 @@
+import { FastifyCookieOptions } from "@fastify/cookie";
+import { envConfig } from "#config/env";
+
+const cookieMaxAge = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+
+export const cookieConfig: FastifyCookieOptions = {
+  parseOptions: {
+    path: "/",
+    secure: envConfig.data.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: cookieMaxAge,
+    signed: true,
+  },
+};
+
+export default cookieConfig;

@@ -17,15 +17,16 @@ const app = Fastify({
   logger: true,
 });
 
-// Environment variables setup
-app.register(fastifyEnv, envConfig);
+// Async function to initialize the application
+const initialize = async () => {
+  // Environment variables setup
+  await app.register(fastifyEnv, envConfig);
 
-//cors setup
-app.register(cors, corsConfig);
+  // Cors setup
+  await app.register(cors, corsConfig);
 
-app.after(() => {
   // JWT setup
-  app.register(jwt, {
+  await app.register(jwt, {
     secret: app.envs.APP_KEY,
   });
 
@@ -34,13 +35,22 @@ app.after(() => {
   app.decorate("generateRefreshToken", tokenDecorators.generateRefreshToken);
 
   // Cookie setup
-  app.register(cookie, {
+  await app.register(cookie, {
     ...cookieConfig,
     secret: app.envs.APP_KEY,
   });
-});
 
-app.register(prisma);
-app.register(WebSocket);
+  // Prisma setup
+  await app.register(prisma);
+
+  // WebSocket setup
+  await app.register(WebSocket);
+};
+
+// Initialize the application
+initialize().catch((err) => {
+  app.log.error(err);
+  process.exit(1);
+});
 
 export default app;

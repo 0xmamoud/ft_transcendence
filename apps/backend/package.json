@@ -11,7 +11,9 @@
     "#controllers/*": "./src/controllers/*.js",
     "#middlewares/*": "./src/middlewares/*.js",
     "#routes/*": "./src/routes/*.js",
-    "#services/*": "./src/services/*.js"
+    "#services/*": "./src/services/*.js",
+    "#types/*": "./src/types/*.js",
+    "#schemas/*": "./src/schemas/*.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
@@ -20,10 +22,12 @@
     "@fastify/jwt": "^9.0.4",
     "@fastify/websocket": "^11.0.2",
     "@prisma/client": "6.3.1",
+    "bcrypt": "^5.1.1",
     "fastify": "^5.2.1",
     "fastify-plugin": "^5.0.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.11.19",
     "@types/ws": "^8.5.14",
     "prisma": "^6.3.1",

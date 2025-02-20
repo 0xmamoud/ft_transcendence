@@ -7,8 +7,8 @@ import cors from "@fastify/cors";
 
 // Configs
 import { envConfig } from "#config/env";
-import prisma from "#config/db";
-import { tokenDecorators } from "#config/auth";
+import db from "#config/db";
+import { passwordPlugin, tokenPlugin } from "#config/auth";
 import cookieConfig from "#config/cookie";
 import corsConfig from "#config/cors";
 
@@ -30,9 +30,9 @@ const initialize = async () => {
     secret: app.envs.APP_KEY,
   });
 
-  // Decorators for auth setup
-  app.decorate("generateAccessToken", tokenDecorators.generateAccessToken);
-  app.decorate("generateRefreshToken", tokenDecorators.generateRefreshToken);
+  // Auth plugins setup
+  await app.register(passwordPlugin);
+  await app.register(tokenPlugin);
 
   // Cookie setup
   await app.register(cookie, {
@@ -41,7 +41,7 @@ const initialize = async () => {
   });
 
   // Prisma setup
-  await app.register(prisma);
+  await app.register(db);
 
   // WebSocket setup
   await app.register(WebSocket);

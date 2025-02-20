@@ -14,11 +14,73 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  email     String   @unique
-  password  String
+  id            Int           @id @default(autoincrement())
+  username      String        @unique
+  email         String        @unique
+  password      String?
+  avatar        String?
+  
+  // Tournaments
+  createdTournaments Tournament[] 
+  participations    Participant[]
+  
+  // Matches
+  matchesAsPlayer1  Match[]      @relation("Player1")
+  matchesAsPlayer2  Match[]      @relation("Player2")
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Tournament {
+  id           Int          @id @default(autoincrement())
+  name         String
+  creator      User         @relation(fields: [creatorId], references: [id])
+  creatorId    Int
+  status       String       @default("PENDING")
+  
+  matches      Match[]
+  participants Participant[]
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Match {
+  id           Int         @id @default(autoincrement())
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+  
+  player1      User       @relation("Player1", fields: [player1Id], references: [id])
+  player1Id    Int
+  player2      User       @relation("Player2", fields: [player2Id], references: [id])
+  player2Id    Int
+  
+  player1Score Int        @default(0)
+  player2Score Int        @default(0)
+  winnerId     Int?      
+  status       String     @default("PENDING")
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Participant {
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+  username     String?
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, tournamentId])
+}
+
+enum TournamentStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
 }

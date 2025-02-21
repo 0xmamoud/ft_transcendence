@@ -10,7 +10,7 @@ export const cookieConfig: FastifyCookieOptions = {
     httpOnly: true,
     sameSite: "strict",
     maxAge: cookieMaxAge,
-    signed: true,
+    signed: false,
   },
 };
 

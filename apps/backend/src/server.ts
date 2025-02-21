@@ -1,16 +1,18 @@
-import app from "#config/app";
+import { configureApp } from "#config/app";
+import authRoutes from "#routes/auth.route";
 
-const start = async () => {
+async function start() {
+  const app = await configureApp();
+
   try {
-    await app.ready();
+    await app.register(authRoutes, { prefix: "/auth" });
 
-    await app.listen({
-      port: app.envs.PORT,
-    });
+    const address = await app.listen({ port: app.envs.PORT });
+    console.log(`Server listening at ${address}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);
   }
-};
+}
 
 start();

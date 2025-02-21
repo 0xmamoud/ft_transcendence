@@ -4,23 +4,28 @@ import WebSocket from "@fastify/websocket";
 import jwt from "@fastify/jwt";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
 
 // Configs
 import { envConfig } from "#config/env";
 import db from "#config/db";
-import { passwordPlugin, tokenPlugin } from "#config/auth";
+import { tokenPlugin, hashPlugin } from "#config/auth";
 import cookieConfig from "#config/cookie";
 import corsConfig from "#config/cors";
 
-// Logger
+// Create Fastify instance
 const app = Fastify({
-  logger: true,
+  logger: false,
 });
 
-// Async function to initialize the application
-const initialize = async () => {
+export async function configureApp() {
   // Environment variables setup
   await app.register(fastifyEnv, envConfig);
+
+  // Multipart setup
+  await app.register(multipart, {
+    attachFieldsToBody: "keyValues",
+  });
 
   // Cors setup
   await app.register(cors, corsConfig);
@@ -28,10 +33,13 @@ const initialize = async () => {
   // JWT setup
   await app.register(jwt, {
     secret: app.envs.APP_KEY,
+    sign: {
+      algorithm: "HS256",
+    },
   });
 
   // Auth plugins setup
-  await app.register(passwordPlugin);
+  await app.register(hashPlugin);
   await app.register(tokenPlugin);
 
   // Cookie setup
@@ -45,12 +53,9 @@ const initialize = async () => {
 
   // WebSocket setup
   await app.register(WebSocket);
-};
 
-// Initialize the application
-initialize().catch((err) => {
-  app.log.error(err);
-  process.exit(1);
-});
+  return app;
+}
 
+// Export the unconfigured app instance
 export default app;

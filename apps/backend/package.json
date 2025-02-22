@@ -1,19 +1,43 @@
 {
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "NODE_ENV=development tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "NODE_ENV=production node dist/server.js"
   },
   "imports": {
-    "#lib/*": "./src/lib/*.js",
-    "#config/*": "./src/config/*.js",
-    "#controllers/*": "./src/controllers/*.js",
-    "#middlewares/*": "./src/middlewares/*.js",
-    "#routes/*": "./src/routes/*.js",
-    "#services/*": "./src/services/*.js",
-    "#types/*": "./src/types/*.js",
-    "#schemas/*": "./src/schemas/*.js"
+    "#lib/*": {
+      "default": "./dist/lib/*.js",
+      "development": "./src/lib/*.ts"
+    },
+    "#config/*": {
+      "default": "./dist/config/*.js", 
+      "development": "./src/config/*.ts"
+    },
+    "#controllers/*": {
+      "default": "./dist/controllers/*.js",
+      "development": "./src/controllers/*.ts"
+    },
+    "#middlewares/*": {
+      "default": "./dist/middlewares/*.js",
+      "development": "./src/middlewares/*.ts"
+    },
+    "#routes/*": {
+      "default": "./dist/routes/*.js",
+      "development": "./src/routes/*.ts"
+    },
+    "#services/*": {
+      "default": "./dist/services/*.js",
+      "development": "./src/services/*.ts"
+    },
+    "#types/*": {
+      "default": "./dist/types/*.js",
+      "development": "./src/types/*.ts"
+    },
+    "#schemas/*": {
+      "default": "./dist/schemas/*.js",
+      "development": "./src/schemas/*.ts"
+    }
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

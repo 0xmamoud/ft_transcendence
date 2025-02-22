@@ -7,7 +7,10 @@ async function start() {
   try {
     await app.register(authRoutes, { prefix: "/auth" });
 
-    const address = await app.listen({ port: app.envs.PORT });
+    const address = await app.listen({
+      port: app.envs.PORT,
+      host: "0.0.0.0",
+    });
     console.log(`Server listening at ${address}`);
   } catch (err) {
     app.log.error(err);

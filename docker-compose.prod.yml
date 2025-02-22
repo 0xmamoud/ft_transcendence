@@ -1,0 +1,26 @@
+services:
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile.prod
+    networks:
+      - transcendence
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.prod
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      - NODE_ENV=production
+    networks:
+      - transcendence
+
+networks:
+  transcendence:
+    driver: bridge

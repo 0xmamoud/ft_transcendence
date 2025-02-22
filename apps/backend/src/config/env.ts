@@ -1,6 +1,6 @@
 const envSchema = {
   type: "object",
-  required: ["APP_KEY"],
+  required: ["APP_KEY", "DATABASE_URL"],
   properties: {
     APP_KEY: {
       type: "string",
@@ -12,6 +12,9 @@ const envSchema = {
     NODE_ENV: {
       type: "string",
       default: "development",
+    },
+    DATABASE_URL: {
+      type: "string",
     },
   },
 };
@@ -28,6 +31,7 @@ declare module "fastify" {
       PORT: number;
       NODE_ENV: string;
       APP_KEY: string;
+      DATABASE_URL: string;
     };
   }
 }

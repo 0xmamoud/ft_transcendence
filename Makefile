@@ -1,13 +1,10 @@
-# Variables
 DC = docker compose
 
-# Couleurs pour une meilleure lisibilité
 BLUE = \033[0;34m
 GREEN = \033[0;32m
 RED = \033[0;31m
 RESET = \033[0m
 
-# Commandes principales
 .PHONY: help dev prod down-dev down-prod clean-dev clean-prod logs-dev logs-prod restart-dev restart-prod
 
 help:

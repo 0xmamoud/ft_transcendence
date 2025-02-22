@@ -1,1 +1,38 @@
-# TODO: i don't give a fuck about this file for now
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - transcendence
+
+  frontend:
+    build:
+      context: ./apps/frontend
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules/
+    environment:
+      - VITE_API_URL=http://localhost/api
+    networks:
+      - transcendence
+
+  backend:
+    build:
+      context: ./apps/backend
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules/
+    environment:
+      - ./apps/backend/.env
+    networks:
+      - transcendence
+
+networks:
+  transcendence:
+    driver: bridge

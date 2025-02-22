@@ -30,8 +30,12 @@ services:
     volumes:
       - ./apps/backend:/app
       - /app/node_modules/
-    environment:
+      - ./apps/backend/prisma:/app/prisma
+      - ./apps/backend/prisma/dev.db:/app/prisma/dev.db
+    env_file:
       - ./apps/backend/.env
+    environment:
+      - NODE_ENV=development
     networks:
       - transcendence
 

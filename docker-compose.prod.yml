@@ -18,6 +18,9 @@ services:
       - ./apps/backend/.env
     environment:
       - NODE_ENV=production
+    volumes:
+      - ./apps/backend/prisma:/app/prisma
+      - ./apps/backend/prisma/dev.db:/app/prisma/dev.db
     networks:
       - transcendence
 

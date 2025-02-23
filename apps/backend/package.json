@@ -1,0 +1,62 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_ENV=development tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "NODE_ENV=production node dist/server.js"
+  },
+  "imports": {
+    "#lib/*": {
+      "default": "./dist/lib/*.js",
+      "development": "./src/lib/*.ts"
+    },
+    "#config/*": {
+      "default": "./dist/config/*.js",
+      "development": "./src/config/*.ts"
+    },
+    "#controllers/*": {
+      "default": "./dist/controllers/*.js",
+      "development": "./src/controllers/*.ts"
+    },
+    "#middlewares/*": {
+      "default": "./dist/middlewares/*.js",
+      "development": "./src/middlewares/*.ts"
+    },
+    "#routes/*": {
+      "default": "./dist/routes/*.js",
+      "development": "./src/routes/*.ts"
+    },
+    "#services/*": {
+      "default": "./dist/services/*.js",
+      "development": "./src/services/*.ts"
+    },
+    "#types/*": {
+      "default": "./dist/types/*.js",
+      "development": "./src/types/*.ts"
+    },
+    "#schemas/*": {
+      "default": "./dist/schemas/*.js",
+      "development": "./src/schemas/*.ts"
+    }
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/env": "^5.0.2",
+    "@fastify/jwt": "^9.0.4",
+    "@fastify/multipart": "^9.0.3",
+    "@fastify/websocket": "^11.0.2",
+    "@prisma/client": "6.3.1",
+    "bcrypt": "^5.1.1",
+    "fastify": "^5.2.1",
+    "fastify-plugin": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.11.19",
+    "@types/ws": "^8.5.14",
+    "prisma": "^6.3.1",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}

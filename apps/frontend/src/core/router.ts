@@ -21,7 +21,8 @@ class Router {
   private renderPage(url: string) {
     const match = this.matchUrlToRoute(url);
     if (!match || !match.route) {
-      document.querySelector("#app")!.innerHTML = "<h1>404: Page Not Found</h1>";
+      document.querySelector("#app")!.innerHTML =
+        "<h1>404: Page Not Found</h1>";
       return;
     }
 
@@ -34,7 +35,6 @@ class Router {
     component.setAttribute("params", JSON.stringify(params));
 
     app.appendChild(component);
-
   }
 
   private loadInitialRoute() {
@@ -42,7 +42,7 @@ class Router {
     window.addEventListener("popstate", () =>
       this.renderPage(location.pathname)
     );
-    this.renderPage(location.pathname)
+    this.renderPage(location.pathname);
   }
 
   private initLinkHandlers() {

@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  username      String        @unique
+  email         String        @unique
+  password      String?
+  avatar        String?
+  session       Session[]
+  
+  // Tournaments
+  createdTournaments Tournament[]
+  participations    Participant[]
+  
+  // Matches
+  matchesAsPlayer1  Match[]      @relation("Player1")
+  matchesAsPlayer2  Match[]      @relation("Player2")
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int      
+  tokenHash    String
+  expiresAt    DateTime
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, tokenHash])
+}
+
+model Tournament {
+  id           Int          @id @default(autoincrement())
+  name         String
+  creator      User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId    Int
+  status       String       @default("PENDING")
+  
+  matches      Match[]
+  participants Participant[]
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Match {
+  id           Int         @id @default(autoincrement())
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId Int
+  
+  player1      User       @relation("Player1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player1Id    Int
+  player2      User       @relation("Player2", fields: [player2Id], references: [id], onDelete: Cascade)
+  player2Id    Int
+  
+  player1Score Int        @default(0)
+  player2Score Int        @default(0)
+  winnerId     Int?      
+  status       String     @default("PENDING")
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Participant {
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentId Int
+  username     String?
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, tournamentId])
+}
+
+enum TournamentStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}

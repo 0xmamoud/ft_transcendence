@@ -1,0 +1,123 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+
+:root {
+  --font-poppins: "Poppins", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  --background: hsl(224 71.4% 4.1%);
+  --foreground: hsl(210 20% 98%);
+
+  --primary: hsl(263.4 70% 50.4%);
+  --secondary: hsl(215 27.9% 16.9%);
+  --destructive: hsl(0 62.8% 30.6%);
+
+  --radius: 0.5rem;
+}
+
+body {
+  font-family: var(--inter);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins);
+}
+
+@theme {
+  --spacing-sm: 10px;
+}
+
+@theme inline {
+  --font-poppins: var(--font-poppins);
+  --font-inter: var(--font-inter);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-destructive: var(--destructive);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  h1 {
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+  }
+
+  h2 {
+    @apply scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0;
+  }
+
+  h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+  }
+
+  h4 {
+    @apply scroll-m-20 text-xl font-semibold tracking-tight;
+  }
+
+  p {
+    @apply leading-7 [&:not(:last-child)]:mb-6;
+  }
+}
+
+@layer utilities {
+  .padding {
+    @apply px-4 py-8 sm:px-8 sm:py-12 lg:px-16 lg:py-16;
+  }
+
+  .padding-x {
+    @apply px-4 sm:px-8 lg:px-16;
+  }
+
+  .padding-y {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 bg-primary text-white rounded-lg 
+    hover:bg-primary/90 transition-all duration-300 text-base md:text-lg 
+    font-medium font-poppins shadow-sm hover:shadow-md hover:shadow-primary/30 cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 border-2 border-secondary hover:border-primary rounded-lg transition-all 
+    duration-300 text-base md:text-lg font-medium font-poppins hover:text-primary 
+    hover:shadow-sm hover:shadow-primary/30 cursor-pointer;
+  }
+}
+
+#mobileMenu {
+  transform-origin: top;
+  transition: transform 0.2s ease, opacity 0.15s ease, max-height 0.2s ease;
+  overflow: hidden;
+  max-height: 0;
+}
+
+#mobileMenu[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  max-height: 300px;
+}
+
+#mobileMenu[data-visible="false"] {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  max-height: 0;
+}

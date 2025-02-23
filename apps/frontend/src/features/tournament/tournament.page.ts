@@ -1,6 +1,6 @@
 import { BaseComponent } from "@/core/components";
 
-class LeaderboardPage extends BaseComponent {
+class TournamentPage extends BaseComponent {
   constructor() {
     super();
   }
@@ -9,11 +9,11 @@ class LeaderboardPage extends BaseComponent {
     this.innerHTML = /* html */ `
       <section class="padding-y">
         <section class="padding-x">
-          <h1>Leaderboard</h1>
+          <h1>Tournament</h1>
         </section>
       </section>
     `;
   }
 }
 
-export default LeaderboardPage;
+export default TournamentPage;

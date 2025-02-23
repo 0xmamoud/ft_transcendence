@@ -1,35 +1,67 @@
+import "@/style.css";
+import { SparklesCore } from "@/features/shared/particle";
+import Router from "@/core/router";
+import HomePage from "@/features/home/home.page";
+import LeaderboardPage from "@/features/leaderboard/leaderboard.page";
+import ProfilePage from "@/features/profile/profile.page";
+import TournamentPage from "@/features/tournament/tournament.page";
+import LoginPage from "@/features/auth/login.page";
+import RegisterPage from "@/features/auth/register.page";
 
-import Router from "./core/router";
+const routes = [
+  { path: "/", component: () => document.createElement("home-page") },
+  {
+    path: "/leaderboard",
+    component: () => document.createElement("leaderboard-page"),
+  },
+  { path: "/profile", component: () => document.createElement("profile-page") },
+  {
+    path: "/tournament",
+    component: () => document.createElement("tournament-page"),
+  },
+  { path: "/login", component: () => document.createElement("login-page") },
+  {
+    path: "/register",
+    component: () => document.createElement("register-page"),
+  },
+];
 
-import StarryBackground from "./features/shared/starryBackground";
-import GamePage from "./features/game/game.page";
-import HomePage from "./features/home/home.page";
-import LeaderboardPage from "./features/leaderboard/leaderboard.page";
-import ProfilePage from "./features/profile/profile.page";
-import LoginPage from "./features/login/login.page";
-import SignupPage from "./features/signup/signup.page";
+export const router = new Router(routes);
 
-function initializeApp() {
-
-  customElements.define("game-page", GamePage);
+const defineCustomElements = () => {
   customElements.define("home-page", HomePage);
   customElements.define("leaderboard-page", LeaderboardPage);
   customElements.define("profile-page", ProfilePage);
+  customElements.define("tournament-page", TournamentPage);
   customElements.define("login-page", LoginPage);
-  customElements.define("signup-page", SignupPage);
+  customElements.define("register-page", RegisterPage);
+};
 
-  const routes = [
-    { path: "/", component: () => document.createElement("home-page") },
-    { path: "/game", component: () => document.createElement("game-page") },
-    { path: "/leaderboard", component: () => document.createElement("leaderboard-page") },
-    { path: "/profile", component: () => document.createElement("profile-page") },
-    { path: "/login", component: () => document.createElement("login-page") },
-    { path: "/signup", component: () => document.createElement("signup-page") },
-  ];
+const initMobileMenu = () => {
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
 
-  new Router(routes);
-  new StarryBackground();
-}
+  const closeMobileMenu = () => {
+    mobileMenu?.setAttribute("data-visible", "false");
+  };
 
-initializeApp();
+  mobileMenuBtn?.addEventListener("click", () => {
+    const isVisible = mobileMenu?.getAttribute("data-visible") === "true";
+    mobileMenu?.setAttribute("data-visible", isVisible ? "false" : "true");
+  });
 
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target.hasAttribute("data-link")) {
+      closeMobileMenu();
+    }
+  });
+};
+
+const init = () => {
+  new SparklesCore("sparklesCanvas");
+  defineCustomElements();
+  initMobileMenu();
+};
+
+document.addEventListener("DOMContentLoaded", init);

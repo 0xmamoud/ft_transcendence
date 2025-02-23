@@ -1,4 +1,4 @@
-import { BaseComponent } from "../../core/baseComponent";
+import { BaseComponent } from "@/core/components";
 
 class ProfilePage extends BaseComponent {
   constructor() {
@@ -6,11 +6,12 @@ class ProfilePage extends BaseComponent {
   }
 
   render() {
-    this.innerHTML = `
-      <div class="profile-page">
-        <h1>Profile Page</h1>
-        <p>Welcome to the profile page!</p>
-      </div>
+    this.innerHTML = /* html */ `
+      <section class="padding-y">
+        <section class="padding-x">
+          <h1>Profile</h1>
+        </section>
+      </section>
     `;
   }
 }

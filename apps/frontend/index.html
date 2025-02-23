@@ -7,13 +7,160 @@
     <link href="/src/style.css" rel="stylesheet" />
     <title>Transcendence</title>
   </head>
-  <body class="bg-background">
-    <div
-      id="particles-container"
-      class="absolute inset-0 h-screen w-full"
-    ></div>
-    <canvas id="sparklesCanvas" class="absolute inset-0 w-full h-full"></canvas>
-    <div id="app"></div>
+  <body class="bg-background min-h-screen">
+    <canvas
+      id="sparklesCanvas"
+      class="absolute inset-0 w-full h-full z-0"
+    ></canvas>
+    <div class="relative z-10 min-h-screen flex flex-col">
+      <!-- Desktop Header -->
+      <header class="shadow-md shadow-secondary/50 border-b border-secondary">
+        <nav
+          class="flex justify-between items-center max-md:hidden px-4 py-6 container mx-auto"
+        >
+          <a href="/" class="text-2xl font-bold hover:text-primary" data-link
+            >Transcendence</a
+          >
+          <ul class="flex gap-8 items-center">
+            <li>
+              <a
+                href="/tournament"
+                data-link
+                class="hover:text-primary transition-colors text-lg font-medium font-poppins"
+                >Play</a
+              >
+            </li>
+            <li>
+              <a
+                href="/leaderboard"
+                data-link
+                class="hover:text-primary transition-colors text-lg font-medium font-poppins"
+                >Leaderboard</a
+              >
+            </li>
+            <li>
+              <a
+                href="/profile"
+                data-link
+                class="hover:text-primary transition-colors text-lg font-medium font-poppins"
+                >Profile</a
+              >
+            </li>
+          </ul>
+          <div class="flex gap-4">
+            <a href="/login" data-link class="btn-secondary">Login</a>
+            <a href="/register" data-link class="btn-primary">Register</a>
+          </div>
+        </nav>
+
+        <!-- Mobile Header -->
+        <nav class="md:hidden px-4 py-4 container mx-auto">
+          <div class="flex justify-between items-center">
+            <a href="/" class="text-xl font-bold hover:text-primary" data-link
+              >Transcendence</a
+            >
+            <button
+              id="mobileMenuBtn"
+              class="text-2xl hover:text-primary"
+              aria-label="Toggle menu"
+            >
+              ☰
+            </button>
+          </div>
+
+          <!-- Mobile Menu -->
+          <div id="mobileMenu" data-visible="false" class="py-4">
+            <ul class="flex flex-col gap-4">
+              <li>
+                <a
+                  href="/tournament"
+                  data-link
+                  class="hover:text-primary transition-colors text-base font-medium font-poppins block"
+                  >Play</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/leaderboard"
+                  data-link
+                  class="hover:text-primary transition-colors text-base font-medium font-poppins block"
+                  >Leaderboard</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/profile"
+                  data-link
+                  class="hover:text-primary transition-colors text-base font-medium font-poppins block"
+                  >Profile</a
+                >
+              </li>
+            </ul>
+            <div class="flex flex-col gap-3 mt-4">
+              <a
+                href="/login"
+                data-link
+                class="btn-secondary w-full text-center"
+                >Login</a
+              >
+              <a
+                href="/register"
+                data-link
+                class="btn-primary w-full text-center"
+                >Register</a
+              >
+            </div>
+          </div>
+        </nav>
+      </header>
+      <div id="app"></div>
+
+      <!-- Footer -->
+      <footer class="mt-auto border-t border-secondary">
+        <div class="container mx-auto px-4 py-8">
+          <div
+            class="flex flex-col md:flex-row justify-between items-center gap-4"
+          >
+            <div class="flex flex-col items-center md:items-start">
+              <a
+                href="/"
+                class="text-xl font-bold hover:text-primary"
+                data-link
+              >
+                Transcendence
+              </a>
+              <p class="text-sm text-foreground/60 mt-2">
+                © 2025 Transcendence. All rights reserved.
+              </p>
+            </div>
+
+            <nav class="flex gap-6">
+              <a
+                href="/tournament"
+                data-link
+                class="hover:text-primary transition-colors"
+              >
+                Play
+              </a>
+              <a
+                href="/leaderboard"
+                data-link
+                class="hover:text-primary transition-colors"
+              >
+                Leaderboard
+              </a>
+              <a
+                href="/profile"
+                data-link
+                class="hover:text-primary transition-colors"
+              >
+                Profile
+              </a>
+            </nav>
+          </div>
+        </div>
+      </footer>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

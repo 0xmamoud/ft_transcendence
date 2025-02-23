@@ -8,7 +8,7 @@ export const loginSchema = {
         password: { type: "string", minLength: 4 },
       },
     },
-    consumes: [ "multipart/form-data"],
+    consumes: ["multipart/form-data"],
   },
 };
 

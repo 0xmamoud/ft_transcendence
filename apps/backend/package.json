@@ -11,7 +11,7 @@
       "development": "./src/lib/*.ts"
     },
     "#config/*": {
-      "default": "./dist/config/*.js", 
+      "default": "./dist/config/*.js",
       "development": "./src/config/*.ts"
     },
     "#controllers/*": {

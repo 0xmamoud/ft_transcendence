@@ -15,14 +15,13 @@
   --radius: 0.5rem;
 }
 
-* {
+body {
+  font-family: var(--inter);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-body {
-  font-family: var(--inter);
 }
 
 h1,
@@ -32,6 +31,10 @@ h4,
 h5,
 h6 {
   font-family: var(--font-poppins);
+}
+
+@theme {
+  --spacing-sm: 10px;
 }
 
 @theme inline {
@@ -84,4 +87,37 @@ h6 {
   .padding-y {
     @apply py-8 sm:py-12 lg:py-16;
   }
+
+  .btn-primary {
+    @apply px-6 py-2.5 bg-primary text-white rounded-lg 
+    hover:bg-primary/90 transition-all duration-300 text-base md:text-lg 
+    font-medium font-poppins shadow-sm hover:shadow-md hover:shadow-primary/30 cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 border-2 border-secondary hover:border-primary rounded-lg transition-all 
+    duration-300 text-base md:text-lg font-medium font-poppins hover:text-primary 
+    hover:shadow-sm hover:shadow-primary/30 cursor-pointer;
+  }
+}
+
+#mobileMenu {
+  transform-origin: top;
+  transition: transform 0.2s ease, opacity 0.15s ease, max-height 0.2s ease;
+  overflow: hidden;
+  max-height: 0;
+}
+
+#mobileMenu[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  max-height: 300px;
+}
+
+#mobileMenu[data-visible="false"] {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  max-height: 0;
 }

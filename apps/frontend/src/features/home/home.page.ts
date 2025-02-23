@@ -9,7 +9,7 @@ class HomePage extends BaseComponent {
     this.innerHTML = /* html */ `
       <section class="padding-y">
         <section class="padding-x flex flex-col items-center justify-center text-center gap-8">
-          <h1 class="text-primary">Pong Challenge</h1>
+          <h1 >Pong Challenge</h1>
           <p class="text-xl max-w-2xl">
             Welcome to the ultimate pong challenge!
             <br>

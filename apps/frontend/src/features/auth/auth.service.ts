@@ -1,7 +1,7 @@
 export class AuthService {
   async login(email: string, password: string) {
     console.log("login", email, password);
-    const response = await fetch("http://localhost:3333/auth/login", {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -8,37 +8,36 @@ import TournamentPage from "@/features/tournament/tournament.page";
 import LoginPage from "@/features/auth/login.page";
 import RegisterPage from "@/features/auth/register.page";
 
-function init() {
-  new SparklesCore("sparklesCanvas");
+const routes = [
+  { path: "/", component: () => document.createElement("home-page") },
+  {
+    path: "/leaderboard",
+    component: () => document.createElement("leaderboard-page"),
+  },
+  { path: "/profile", component: () => document.createElement("profile-page") },
+  {
+    path: "/tournament",
+    component: () => document.createElement("tournament-page"),
+  },
+  { path: "/login", component: () => document.createElement("login-page") },
+  {
+    path: "/register",
+    component: () => document.createElement("register-page"),
+  },
+];
 
+export const router = new Router(routes);
+
+const defineCustomElements = () => {
   customElements.define("home-page", HomePage);
   customElements.define("leaderboard-page", LeaderboardPage);
   customElements.define("profile-page", ProfilePage);
   customElements.define("tournament-page", TournamentPage);
   customElements.define("login-page", LoginPage);
   customElements.define("register-page", RegisterPage);
+};
 
-  new Router([
-    { path: "/", component: () => document.createElement("home-page") },
-    {
-      path: "/leaderboard",
-      component: () => document.createElement("leaderboard-page"),
-    },
-    {
-      path: "/profile",
-      component: () => document.createElement("profile-page"),
-    },
-    {
-      path: "/tournament",
-      component: () => document.createElement("tournament-page"),
-    },
-    { path: "/login", component: () => document.createElement("login-page") },
-    {
-      path: "/register",
-      component: () => document.createElement("register-page"),
-    },
-  ]);
-
+const initMobileMenu = () => {
   const mobileMenuBtn = document.getElementById("mobileMenuBtn");
   const mobileMenu = document.getElementById("mobileMenu");
 
@@ -57,8 +56,12 @@ function init() {
       closeMobileMenu();
     }
   });
-}
+};
 
-document.addEventListener("DOMContentLoaded", () => {
-  init();
-});
+const init = () => {
+  new SparklesCore("sparklesCanvas");
+  defineCustomElements();
+  initMobileMenu();
+};
+
+document.addEventListener("DOMContentLoaded", init);

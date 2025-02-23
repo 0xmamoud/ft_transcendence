@@ -1,5 +1,6 @@
 import { BaseComponent } from "@/core/components";
 import { authService } from "@/features/auth/auth.service";
+import { router } from "@/main";
 
 class LoginPage extends BaseComponent {
   constructor() {
@@ -25,6 +26,7 @@ class LoginPage extends BaseComponent {
 
     try {
       await authService.login(email, password);
+      router.navigateTo("/profile");
     } catch (error) {
       console.error(error);
     }

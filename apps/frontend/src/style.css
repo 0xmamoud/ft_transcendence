@@ -89,15 +89,19 @@ h6 {
   }
 
   .btn-primary {
-    @apply px-6 py-2.5 bg-primary text-white rounded-lg 
+    @apply px-3 py-2 md:px-6 md:py-2.5 bg-primary text-white rounded-lg 
     hover:bg-primary/90 transition-all duration-300 text-base md:text-lg 
     font-medium font-poppins shadow-sm hover:shadow-md hover:shadow-primary/30 cursor-pointer;
   }
 
   .btn-secondary {
-    @apply px-6 py-2.5 border-2 border-secondary hover:border-primary rounded-lg transition-all 
+    @apply px-3 py-2 md:px-6 md:py-2.5 border-2 border-secondary hover:border-primary rounded-lg transition-all 
     duration-300 text-base md:text-lg font-medium font-poppins hover:text-primary 
     hover:shadow-sm hover:shadow-primary/30 cursor-pointer;
+  }
+
+  .input {
+    @apply px-4 py-2 rounded-lg border border-secondary bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
   }
 }
 

@@ -11,13 +11,13 @@ class HomePage extends BaseComponent {
         <section class="padding-x flex flex-col items-center justify-center text-center gap-8">
           <h1 >Pong Challenge</h1>
           <p class="text-xl max-w-2xl">
-            Welcome to the ultimate pong challenge!
+            Welcome to the ultimate pong challenge !
             <br>
             Invite your friends and compete to see who is the best pong player.
           </p>
           <h2 class="text-foreground">Are you ready to take the challenge?</h2>
           <div class="flex items-center gap-4 mt-4">
-            <a href="/game" data-link>
+            <a href="/tournament" data-link>
               <button class="btn-primary">
                 Try it out
               </button>

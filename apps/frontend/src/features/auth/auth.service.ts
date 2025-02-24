@@ -9,12 +9,13 @@ export class AuthService {
       body: JSON.stringify({ email, password }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to login");
+      throw new Error(data.message || "Failed to login");
     }
 
-    return response.json();
+    return data;
   }
 
   async register(username: string, email: string, password: string) {
@@ -26,28 +27,27 @@ export class AuthService {
       body: JSON.stringify({ username, email, password }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to register");
+      throw new Error(data.message || "Failed to register");
     }
 
-    return response.json();
+    return data;
   }
 
   async logout() {
     const response = await fetch("/api/auth/logout", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Failed to logout");
+      throw new Error(data.message || "Failed to logout");
     }
 
-    return response.json();
+    return data;
   }
 }
 

@@ -25,7 +25,8 @@ class LoginPage extends BaseComponent {
     const password = form.get("password") as string;
 
     try {
-      await authService.login(email, password);
+      const response = await authService.login(email, password);
+      console.log("login", response);
       router.navigateTo("/profile");
     } catch (error) {
       console.error(error);
@@ -34,7 +35,7 @@ class LoginPage extends BaseComponent {
 
   render() {
     this.innerHTML = /* html */ `
-      <section class="min-h-screen flex items-center justify-center padding-x">
+      <section class=" flex items-center justify-center padding">
         <form class="flex flex-col p-8 gap-6 mx-auto w-full max-w-md bg-background rounded-lg border border-secondary shadow-lg">
           <div class="text-center">
             <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
@@ -47,7 +48,7 @@ class LoginPage extends BaseComponent {
               type="email" 
               id="email"
               name="email"
-              class="px-4 py-2 rounded-lg border border-secondary bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              class="input"
               placeholder="Enter your email"
               required
             />
@@ -59,7 +60,7 @@ class LoginPage extends BaseComponent {
               type="password"
               id="password"
               name="password"
-              class="px-4 py-2 rounded-lg border border-secondary bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              class="input"
               placeholder="Enter your password"
               required
             />

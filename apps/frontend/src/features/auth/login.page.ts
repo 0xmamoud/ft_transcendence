@@ -47,7 +47,7 @@ class LoginPage extends BaseComponent {
               type="email" 
               id="email"
               name="email"
-              class="px-4 py-2 rounded-lg border border-secondary bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              class="input"
               placeholder="Enter your email"
               required
             />
@@ -59,7 +59,7 @@ class LoginPage extends BaseComponent {
               type="password"
               id="password"
               name="password"
-              class="px-4 py-2 rounded-lg border border-secondary bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              class="input"
               placeholder="Enter your password"
               required
             />

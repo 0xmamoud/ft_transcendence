@@ -65,3 +65,11 @@ const init = () => {
 };
 
 document.addEventListener("DOMContentLoaded", init);
+
+// Add HMR support
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule) => {
+    // Force page reload when components are updated
+    window.location.reload();
+  });
+}

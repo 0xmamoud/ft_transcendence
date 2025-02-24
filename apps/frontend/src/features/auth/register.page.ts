@@ -34,7 +34,7 @@ class RegisterPage extends BaseComponent {
 
   render() {
     this.innerHTML = /* html */ `
-      <section class="min-h-screen flex items-center justify-center padding-x">
+      <section class=" flex items-center justify-center padding">
         <form class="flex flex-col p-8 gap-6 mx-auto w-full max-w-md bg-background rounded-lg border border-secondary shadow-lg">
           <div class="text-center">
             <h1 class="text-3xl font-bold mb-2">Create Account</h1>

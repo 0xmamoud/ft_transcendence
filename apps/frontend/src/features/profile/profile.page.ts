@@ -58,7 +58,9 @@ class ProfilePage extends BaseComponent {
           <div class="user-info">
             <p>Nom d'utilisateur: ${this.userProfile?.username || "N/A"}</p>
             <p>Email: ${this.userProfile?.email || "N/A"}</p>
-            <p>Avatar: ${this.userProfile?.avatar || "N/A"}</p>
+            <img src="${
+              this.userProfile?.avatar
+            }" alt="Avatar" class="w-10 h-10 rounded-full" />
           </div>
           <button class="btn-primary logout-btn">
             Logout

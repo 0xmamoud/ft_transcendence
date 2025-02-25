@@ -10,7 +10,7 @@ import multipart from "@fastify/multipart";
 import { envConfig } from "#config/env";
 import db from "#config/db";
 import { tokenPlugin, hashPlugin } from "#config/auth";
-import cookieConfig from "#config/cookie";
+import { createCookieConfig } from "#config/cookie";
 import corsConfig from "#config/cors";
 
 // Create Fastify instance
@@ -43,6 +43,7 @@ export async function configureApp() {
   await app.register(tokenPlugin);
 
   // Cookie setup
+  const cookieConfig = createCookieConfig(app.envs);
   await app.register(cookie, {
     ...cookieConfig,
     secret: app.envs.APP_KEY,
@@ -53,6 +54,7 @@ export async function configureApp() {
 
   // WebSocket setup
   await app.register(WebSocket);
+  // console.log(app.envs);
 
   return app;
 }

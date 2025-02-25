@@ -1,6 +1,12 @@
 const envSchema = {
   type: "object",
-  required: ["APP_KEY", "DATABASE_URL"],
+  required: [
+    "APP_KEY",
+    "DATABASE_URL",
+    "API_URL",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+  ],
   properties: {
     APP_KEY: {
       type: "string",
@@ -14,6 +20,15 @@ const envSchema = {
       default: "development",
     },
     DATABASE_URL: {
+      type: "string",
+    },
+    API_URL: {
+      type: "string",
+    },
+    GOOGLE_CLIENT_ID: {
+      type: "string",
+    },
+    GOOGLE_CLIENT_SECRET: {
       type: "string",
     },
   },
@@ -32,6 +47,9 @@ declare module "fastify" {
       NODE_ENV: string;
       APP_KEY: string;
       DATABASE_URL: string;
+      API_URL: string;
+      GOOGLE_CLIENT_ID: string;
+      GOOGLE_CLIENT_SECRET: string;
     };
   }
 }

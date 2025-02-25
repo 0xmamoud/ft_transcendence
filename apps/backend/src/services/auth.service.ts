@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyReply } from "fastify";
 import { LoginData, RegisterData } from "#types/auth.type";
 
 export class AuthService {

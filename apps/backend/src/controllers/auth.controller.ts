@@ -1,8 +1,12 @@
-import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
+import { FastifyRequest, FastifyReply } from "fastify";
 import { AuthService } from "#services/auth.service";
+import { GoogleService } from "#services/google.service";
 
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleService: GoogleService
+  ) {}
 
   async login(request: FastifyRequest, reply: FastifyReply) {
     try {
@@ -56,6 +60,35 @@ export class AuthController {
     } catch (error) {
       console.log("General error:", error);
       reply.status(400).send({ message: "Failed to logout" });
+    }
+  }
+
+  async googleAuth(request: FastifyRequest, reply: FastifyReply) {
+    const authUrl = this.googleService.generateAuthUrl();
+    reply.redirect(authUrl);
+  }
+
+  async googleAuthCallback(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { code } = request.query as { code: string };
+
+      if (!code) {
+        reply.redirect("/login?error=No code provided");
+        return;
+      }
+
+      const { accessToken, refreshToken } =
+        await this.googleService.handleAuthCallback(code);
+
+      reply.setCookie("refreshToken", refreshToken);
+      reply.setCookie("accessToken", accessToken);
+
+      reply.redirect("/profile");
+    } catch (error) {
+      console.error("Google authentication error:", error);
+      reply.redirect(
+        `/login?error=${encodeURIComponent("Authentication failed")}`
+      );
     }
   }
 }

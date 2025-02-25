@@ -33,11 +33,20 @@ class LoginPage extends BaseComponent {
     super.connectedCallback();
     const form = this.querySelector("form");
     form?.addEventListener("submit", this.handleSubmit.bind(this));
+
+    const googleAuthBtn = this.querySelector("#google-auth-btn");
+    googleAuthBtn?.addEventListener("click", this.handleGoogleAuth.bind(this));
   }
 
   disconnectedCallback() {
     const form = this.querySelector("form");
     form?.removeEventListener("submit", this.handleSubmit.bind(this));
+
+    const googleAuthBtn = this.querySelector("#google-auth-btn");
+    googleAuthBtn?.removeEventListener(
+      "click",
+      this.handleGoogleAuth.bind(this)
+    );
   }
 
   async handleSubmit(e: Event) {
@@ -60,6 +69,10 @@ class LoginPage extends BaseComponent {
           : "An error occurred during login";
       this.setError(errorMessage);
     }
+  }
+
+  handleGoogleAuth() {
+    window.location.href = "/api/auth/google";
   }
 
   render() {
@@ -102,6 +115,15 @@ class LoginPage extends BaseComponent {
             class="btn-primary active:scale-[0.98] transition-all"
           >
             Sign In
+          </button>
+          <p class="text-center text-xl m-0">Or</p>
+          <button
+            class="btn-secondary active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            type="button"
+            id="google-auth-btn"
+          >
+            <img src="/google.svg" alt="Google" class="w-10 h-10" />
+            Sign In with Google
           </button>
 
           <div class="flex flex-col gap-2 text-center text-sm">

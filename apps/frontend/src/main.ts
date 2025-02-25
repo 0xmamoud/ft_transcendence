@@ -7,7 +7,6 @@ import ProfilePage from "@/features/profile/profile.page";
 import TournamentPage from "@/features/tournament/tournament.page";
 import LoginPage from "@/features/auth/login.page";
 import RegisterPage from "@/features/auth/register.page";
-import AuthCallbackPage from "@/features/auth/auth-callback.page";
 
 const routes = [
   { path: "/", component: () => document.createElement("home-page") },
@@ -40,7 +39,6 @@ const defineCustomElements = () => {
   customElements.define("tournament-page", TournamentPage);
   customElements.define("login-page", LoginPage);
   customElements.define("register-page", RegisterPage);
-  customElements.define("auth-callback-page", AuthCallbackPage);
 };
 
 const initMobileMenu = () => {

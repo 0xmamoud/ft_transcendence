@@ -52,8 +52,6 @@ export class AuthService {
 
   async checkAuthStatus() {
     try {
-      // Vérifier si l'utilisateur est connecté en vérifiant les cookies
-      // Cette méthode peut être appelée au chargement de l'application
       const response = await fetch("/api/auth/status", {
         method: "GET",
       });
@@ -70,10 +68,7 @@ export class AuthService {
     }
   }
 
-  // Méthode pour gérer le retour de l'authentification Google
   handleGoogleAuthRedirect() {
-    // Cette méthode peut être appelée sur la page de redirection après l'authentification Google
-    // Par exemple, vous pourriez avoir une page /auth/callback qui appelle cette méthode
     const urlParams = new URLSearchParams(window.location.search);
     const error = urlParams.get("error");
 
@@ -81,7 +76,6 @@ export class AuthService {
       throw new Error(error);
     }
 
-    // Si pas d'erreur, l'authentification a réussi et les cookies ont été définis par le backend
     return { success: true };
   }
 }

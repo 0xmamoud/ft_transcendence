@@ -2,16 +2,12 @@ import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import { AuthService } from "#services/auth.service";
 
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly app: FastifyInstance
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   async login(request: FastifyRequest, reply: FastifyReply) {
     try {
       const token = request.cookies.refreshToken;
-      if (token)
-        reply.status(401).send({ message: "Already logged in" });
+      if (token) reply.status(401).send({ message: "Already logged in" });
 
       const { email, password } = request.body as {
         email: string;
@@ -51,11 +47,10 @@ export class AuthController {
         return;
       }
 
-        const user = await this.app.verifyToken(refreshToken);
-        await this.authService.logout(user.userId, refreshToken);
+      await this.authService.logout(request.user.userId, refreshToken);
 
-        reply.clearCookie("refreshToken");
-        reply.clearCookie("accessToken");
+      reply.clearCookie("refreshToken");
+      reply.clearCookie("accessToken");
 
       reply.status(200).send({ message: "Logged out successfully" });
     } catch (error) {

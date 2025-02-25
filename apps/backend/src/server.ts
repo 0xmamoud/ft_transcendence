@@ -1,11 +1,16 @@
 import { configureApp } from "#config/app";
 import authRoutes from "#routes/auth.route";
+import userRoutes from "#routes/user.route";
+import { authMiddleware } from "#middlewares/auth.middleware";
 
 async function start() {
   const app = await configureApp();
 
   try {
+    await app.register(authMiddleware);
+
     await app.register(authRoutes, { prefix: "/auth" });
+    await app.register(userRoutes, { prefix: "/users" });
 
     const address = await app.listen({
       port: app.envs.PORT,

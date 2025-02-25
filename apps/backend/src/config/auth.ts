@@ -1,12 +1,7 @@
-import { FastifyJWT } from "@fastify/jwt";
 import { FastifyInstance } from "fastify";
 import bcrypt from "bcrypt";
 import fp from "fastify-plugin";
-
-interface JWTPayload {
-  userId: number;
-  username: string;
-}
+import { JWTPayload } from "#types/auth.type";
 
 interface PasswordUtils {
   hash(password: string): Promise<string>;

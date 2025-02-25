@@ -8,3 +8,8 @@ export interface RegisterData {
   password: string;
   username: string;
 }
+
+export interface JWTPayload {
+  userId: number;
+  username: string;
+}

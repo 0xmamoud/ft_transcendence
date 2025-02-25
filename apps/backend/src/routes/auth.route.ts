@@ -5,7 +5,7 @@ import { AuthService } from "#services/auth.service";
 
 async function authRoutes(app: FastifyInstance) {
   const authService = new AuthService(app);
-  const authController = new AuthController(authService, app);
+  const authController = new AuthController(authService);
 
   app.post("/login", loginSchema, authController.login.bind(authController));
   app.post(
@@ -13,6 +13,10 @@ async function authRoutes(app: FastifyInstance) {
     registerSchema,
     authController.register.bind(authController)
   );
-  app.post("/logout", authController.logout.bind(authController));
+  app.post(
+    "/logout",
+    { preHandler: app.authenticate },
+    authController.logout.bind(authController)
+  );
 }
 export default authRoutes;

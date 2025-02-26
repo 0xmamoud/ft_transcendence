@@ -36,3 +36,13 @@ export interface GoogleUserInfo {
   name: string;
   picture: string;
 }
+
+export interface TwoFactorData {
+  secret: string;
+  uri: string;
+}
+
+export interface TwoFactorAuthData {
+  token: string;
+  secret: string;
+}

@@ -1,5 +1,4 @@
-import { FastifyInstance, FastifyReply } from "fastify";
-import { LoginData, RegisterData } from "#types/auth.type";
+import { FastifyInstance } from "fastify";
 
 export class AuthService {
   constructor(private readonly app: FastifyInstance) {}
@@ -19,6 +18,13 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new Error("Invalid password");
+    }
+
+    if (user.isTwoFactorEnabled) {
+      return {
+        requires2FA: true,
+        userId: user.id,
+      };
     }
 
     const accessToken = await this.app.generateAccessToken({
@@ -45,13 +51,34 @@ export class AuthService {
   }
 
   async register(email: string, password: string, username: string) {
-    await this.app.db.user.create({
+    const user = await this.app.db.user.create({
       data: {
         email,
         password: await this.app.hash(password),
         username,
       },
     });
+    const accessToken = await this.app.generateAccessToken({
+      userId: user.id,
+      username: user.username,
+    });
+    const refreshToken = await this.app.generateRefreshToken({
+      userId: user.id,
+      username: user.username,
+    });
+
+    await this.app.db.session.create({
+      data: {
+        userId: user.id,
+        tokenHash: refreshToken,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+      },
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   async logout(userId: number, refreshToken: string) {

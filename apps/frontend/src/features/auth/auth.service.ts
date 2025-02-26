@@ -1,6 +1,20 @@
-export class AuthService {
+interface AuthService {
+  login(
+    email: string,
+    password: string
+  ): Promise<{ message: string } | { userId: number; requires2FA: boolean }>;
+
+  register(
+    email: string,
+    password: string,
+    username: string
+  ): Promise<{ message: string }>;
+  loginWith2FA(userId: number, token: string): Promise<{ message: string }>;
+  logout(): Promise<{ message: string }>;
+}
+
+class AuthService implements AuthService {
   async login(email: string, password: string) {
-    console.log("login", email, password);
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
@@ -18,19 +32,37 @@ export class AuthService {
     return data;
   }
 
-  async register(username: string, email: string, password: string) {
+  async register(email: string, password: string, username: string) {
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ email, password, username }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
       throw new Error(data.message || "Failed to register");
+    }
+
+    return data;
+  }
+
+  async loginWith2FA(userId: number, token: string) {
+    const response = await fetch("/api/2fa/login-with-2fa", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, token }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to verify 2FA");
     }
 
     return data;
@@ -48,24 +80,6 @@ export class AuthService {
     }
 
     return data;
-  }
-
-  async checkAuthStatus() {
-    try {
-      const response = await fetch("/api/auth/status", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        return { isAuthenticated: false };
-      }
-
-      const data = await response.json();
-      return { isAuthenticated: true, user: data.user };
-    } catch (error) {
-      console.error("Error checking auth status:", error);
-      return { isAuthenticated: false };
-    }
   }
 
   handleGoogleAuthRedirect() {

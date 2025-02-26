@@ -20,6 +20,9 @@ model User {
   password      String?
   avatar        String?
   session       Session[]
+
+  twoFactorSecret String?    
+  isTwoFactorEnabled Boolean  @default(false) 
   
   // Tournaments
   createdTournaments Tournament[]

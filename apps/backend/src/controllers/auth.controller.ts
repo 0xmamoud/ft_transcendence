@@ -17,12 +17,18 @@ export class AuthController {
         email: string;
         password: string;
       };
-      const { accessToken, refreshToken } = await this.authService.login(
-        email,
-        password
-      );
-      reply.setCookie("refreshToken", refreshToken);
-      reply.setCookie("accessToken", accessToken);
+      const result = await this.authService.login(email, password);
+
+      if (result.requires2FA) {
+        reply.status(200).send({
+          requires2FA: true,
+          userId: result.userId,
+        });
+        return;
+      }
+
+      reply.setCookie("refreshToken", result.refreshToken!);
+      reply.setCookie("accessToken", result.accessToken!);
       reply.status(200).send({ message: "Logged in successfully" });
     } catch (error) {
       reply.status(401).send({ message: "Invalid credentials" });
@@ -36,7 +42,10 @@ export class AuthController {
         password: string;
         username: string;
       };
-      await this.authService.register(email, password, username);
+      const result = await this.authService.register(email, password, username);
+      reply.setCookie("refreshToken", result.refreshToken!);
+      reply.setCookie("accessToken", result.accessToken!);
+
       reply.status(200).send({ message: "Registered successfully" });
     } catch (error) {
       reply.status(400).send({ message: "Failed to register" });

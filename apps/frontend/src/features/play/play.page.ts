@@ -16,16 +16,64 @@ class PlayPage extends BaseComponent {
 
   private setupEventListeners() {
     const accordionButtons = this.querySelectorAll("[data-accordion-target]");
+    const createGameForm =
+      this.querySelector<HTMLFormElement>("#createGameForm");
+    const joinGameForm = this.querySelector<HTMLFormElement>("#joinGameForm");
+    const createTournamentForm = this.querySelector<HTMLFormElement>(
+      "#createTournamentForm"
+    );
+    const joinTournamentForm = this.querySelector<HTMLFormElement>(
+      "#joinTournamentForm"
+    );
+
     accordionButtons.forEach((button) => {
       button.addEventListener("click", this.handleAccordionClick.bind(this));
     });
+
+    createGameForm?.addEventListener(
+      "submit",
+      this.handleCreateGame.bind(this)
+    );
+    joinGameForm?.addEventListener("submit", this.handleJoinGame.bind(this));
+    createTournamentForm?.addEventListener(
+      "submit",
+      this.handleCreateTournament.bind(this)
+    );
+    joinTournamentForm?.addEventListener(
+      "submit",
+      this.handleJoinTournament.bind(this)
+    );
   }
 
   private removeEventListeners() {
     const accordionButtons = this.querySelectorAll("[data-accordion-target]");
+    const createGameForm =
+      this.querySelector<HTMLFormElement>("#createGameForm");
+    const joinGameForm = this.querySelector<HTMLFormElement>("#joinGameForm");
+    const createTournamentForm = this.querySelector<HTMLFormElement>(
+      "#createTournamentForm"
+    );
+    const joinTournamentForm = this.querySelector<HTMLFormElement>(
+      "#joinTournamentForm"
+    );
+
     accordionButtons.forEach((button) => {
       button.removeEventListener("click", this.handleAccordionClick.bind(this));
     });
+
+    createGameForm?.removeEventListener(
+      "submit",
+      this.handleCreateGame.bind(this)
+    );
+    joinGameForm?.removeEventListener("submit", this.handleJoinGame.bind(this));
+    createTournamentForm?.removeEventListener(
+      "submit",
+      this.handleCreateTournament.bind(this)
+    );
+    joinTournamentForm?.removeEventListener(
+      "submit",
+      this.handleJoinTournament.bind(this)
+    );
   }
 
   private handleAccordionClick(event: Event) {
@@ -42,6 +90,50 @@ class PlayPage extends BaseComponent {
 
       if (!isExpanded) content.classList.remove("hidden");
     }
+  }
+
+  private handleCreateGame(event: SubmitEvent) {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const gameName = formData.get("gameName") as string;
+
+    // TODO: Implement game creation logic
+    console.log("Creating game:", gameName);
+    window.location.href = `/online-game/create/${gameName}`;
+  }
+
+  private handleJoinGame(event: SubmitEvent) {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const gameId = formData.get("gameId") as string;
+
+    // TODO: Implement game joining logic
+    console.log("Joining game:", gameId);
+    window.location.href = `/online-game/join/${gameId}`;
+  }
+
+  private handleCreateTournament(event: SubmitEvent) {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const tournamentName = formData.get("tournamentName") as string;
+
+    // TODO: Implement tournament creation logic
+    console.log("Creating tournament:", tournamentName);
+    window.location.href = `/tournament/create/${tournamentName}`;
+  }
+
+  private handleJoinTournament(event: SubmitEvent) {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const tournamentId = formData.get("tournamentId") as string;
+
+    // TODO: Implement tournament joining logic
+    console.log("Joining tournament:", tournamentId);
+    window.location.href = `/tournament/join/${tournamentId}`;
   }
 
   render() {
@@ -90,8 +182,41 @@ class PlayPage extends BaseComponent {
                 </svg>
               </button>
               <div id="onlineGame" class="hidden p-5 border-t border-secondary" data-accordion-content>
-                <p class="mb-4">Challenge another player online in a 1v1 match!</p>
-                <button class="btn-primary">Find Online Match</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="p-4 border border-secondary rounded-lg">
+                    <h3 class="font-bold mb-4">Create Game</h3>
+                    <form id="createGameForm" class="space-y-4">
+                      <div>
+                        <label for="gameName" class="block mb-2">Game Name</label>
+                        <input
+                          type="text"
+                          id="gameName"
+                          name="gameName"
+                          class="w-full p-2 rounded bg-background border border-secondary"
+                          required
+                        />
+                      </div>
+                      <button type="submit" class="btn-primary w-full">Create Game</button>
+                    </form>
+                  </div>
+                  
+                  <div class="p-4 border border-secondary rounded-lg">
+                    <h3 class="font-bold mb-4">Join Game</h3>
+                    <form id="joinGameForm" class="space-y-4">
+                      <div>
+                        <label for="gameId" class="block mb-2">Game ID</label>
+                        <input
+                          type="text"
+                          id="gameId"
+                          name="gameId"
+                          class="w-full p-2 rounded bg-background border border-secondary"
+                          required
+                        />
+                      </div>
+                      <button type="submit" class="btn-primary w-full">Join Game</button>
+                    </form>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -112,10 +237,40 @@ class PlayPage extends BaseComponent {
                 </svg>
               </button>
               <div id="tournament" class="hidden p-5 border-t border-secondary" data-accordion-content>
-                <p class="mb-4">Join or create a tournament and compete with multiple players!</p>
-                <div class="flex gap-4 max-md:flex-col">
-                  <button class="btn-primary">Create Tournament</button>
-                  <button class="btn-secondary">Join Tournament</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="p-4 border border-secondary rounded-lg">
+                    <h3 class="font-bold mb-4">Create Tournament</h3>
+                    <form id="createTournamentForm" class="space-y-4">
+                      <div>
+                        <label for="tournamentName" class="block mb-2">Tournament Name</label>
+                        <input
+                          type="text"
+                          id="tournamentName"
+                          name="tournamentName"
+                          class="w-full p-2 rounded bg-background border border-secondary"
+                          required
+                        />
+                      </div>
+                      <button type="submit" class="btn-primary w-full">Create Tournament</button>
+                    </form>
+                  </div>
+                  
+                  <div class="p-4 border border-secondary rounded-lg">
+                    <h3 class="font-bold mb-4">Join Tournament</h3>
+                    <form id="joinTournamentForm" class="space-y-4">
+                      <div>
+                        <label for="tournamentId" class="block mb-2">Tournament ID</label>
+                        <input
+                          type="text"
+                          id="tournamentId"
+                          name="tournamentId"
+                          class="w-full p-2 rounded bg-background border border-secondary"
+                          required
+                        />
+                      </div>
+                      <button type="submit" class="btn-primary w-full">Join Tournament</button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>

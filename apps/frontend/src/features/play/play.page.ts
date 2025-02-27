@@ -113,7 +113,7 @@ class PlayPage extends BaseComponent {
               </button>
               <div id="tournament" class="hidden p-5 border-t border-secondary" data-accordion-content>
                 <p class="mb-4">Join or create a tournament and compete with multiple players!</p>
-                <div class="flex gap-4">
+                <div class="flex gap-4 max-md:flex-col">
                   <button class="btn-primary">Create Tournament</button>
                   <button class="btn-secondary">Join Tournament</button>
                 </div>

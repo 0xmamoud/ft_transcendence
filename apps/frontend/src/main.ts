@@ -4,7 +4,8 @@ import Router from "@/core/router";
 import HomePage from "@/features/home/home.page";
 import LeaderboardPage from "@/features/leaderboard/leaderboard.page";
 import ProfilePage from "@/features/profile/profile.page";
-import TournamentPage from "@/features/tournament/tournament.page";
+import PlayPage from "@/features/play/play.page";
+import LocalGamePage from "@/features/play/local-game.page";
 import LoginPage from "@/features/auth/login.page";
 import RegisterPage from "@/features/auth/register.page";
 
@@ -16,17 +17,17 @@ const routes = [
   },
   { path: "/profile", component: () => document.createElement("profile-page") },
   {
-    path: "/tournament",
-    component: () => document.createElement("tournament-page"),
+    path: "/play",
+    component: () => document.createElement("play-page"),
+  },
+  {
+    path: "/local-game",
+    component: () => document.createElement("local-game-page"),
   },
   { path: "/login", component: () => document.createElement("login-page") },
   {
     path: "/register",
     component: () => document.createElement("register-page"),
-  },
-  {
-    path: "/auth/callback",
-    component: () => document.createElement("auth-callback-page"),
   },
 ];
 
@@ -36,7 +37,8 @@ const defineCustomElements = () => {
   customElements.define("home-page", HomePage);
   customElements.define("leaderboard-page", LeaderboardPage);
   customElements.define("profile-page", ProfilePage);
-  customElements.define("tournament-page", TournamentPage);
+  customElements.define("play-page", PlayPage);
+  customElements.define("local-game-page", LocalGamePage);
   customElements.define("login-page", LoginPage);
   customElements.define("register-page", RegisterPage);
 };

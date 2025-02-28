@@ -25,6 +25,12 @@ async function tournamentRoutes(app: FastifyInstance) {
             },
           },
         },
+        querystring: {
+          type: "object",
+          properties: {
+            maxParticipants: { type: "number", minimum: 2 },
+          },
+        },
       },
     },
     tournamentController.createTournament

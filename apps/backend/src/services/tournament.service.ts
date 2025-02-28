@@ -6,7 +6,8 @@ export class TournamentService {
   async createTournament(
     tournamentName: string,
     creatorId: number,
-    username?: string
+    username?: string,
+    maxParticipants?: number
   ) {
     if (!username) {
       const user = await this.app.db.user.findUnique({
@@ -16,7 +17,11 @@ export class TournamentService {
     }
 
     const tournament = await this.app.db.tournament.create({
-      data: { name: tournamentName, creatorId },
+      data: {
+        name: tournamentName,
+        creatorId,
+        maxParticipants,
+      },
     });
 
     await this.app.db.participant.create({
@@ -46,6 +51,13 @@ export class TournamentService {
 
     if (tournament.status !== "PENDING") {
       throw new Error("Tournament is not accepting participants");
+    }
+
+    if (
+      tournament.maxParticipants &&
+      tournament.participants.length >= tournament.maxParticipants
+    ) {
+      throw new Error("Tournament is full");
     }
 
     if (!username) {
@@ -109,7 +121,8 @@ export class TournamentService {
       throw new Error("Tournament is not pending");
     }
 
-    if (tournament.participants.length < 2) {
+    const minParticipants = 2;
+    if (tournament.participants.length < minParticipants) {
       throw new Error("Not enough participants to start the tournament");
     }
 
@@ -157,9 +170,8 @@ export class TournamentService {
     });
   }
 
-  async getTournament(tournamentId: number) {
-    return await this.app.db.tournament.findUnique({
-      where: { id: tournamentId },
+  async getTournaments() {
+    return await this.app.db.tournament.findMany({
       include: {
         participants: {
           include: {
@@ -191,8 +203,9 @@ export class TournamentService {
     });
   }
 
-  async getTournaments() {
-    return await this.app.db.tournament.findMany({
+  async getTournament(tournamentId: number) {
+    return await this.app.db.tournament.findUnique({
+      where: { id: tournamentId },
       include: {
         participants: {
           include: {

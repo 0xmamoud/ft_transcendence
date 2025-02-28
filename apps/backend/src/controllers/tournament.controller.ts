@@ -1,6 +1,10 @@
 import { TournamentService } from "#services/tournament.service";
 import { FastifyRequest, FastifyReply } from "fastify";
 
+interface CreateTournamentQuery {
+  maxParticipants?: number;
+}
+
 export class TournamentController {
   constructor(private readonly tournamentService: TournamentService) {}
 
@@ -27,14 +31,20 @@ export class TournamentController {
   }
 
   async createTournament(
-    request: FastifyRequest<{ Body: { name: string } }>,
+    request: FastifyRequest<{
+      Body: { name: string };
+      Querystring: CreateTournamentQuery;
+    }>,
     reply: FastifyReply
   ) {
     try {
       const { name } = request.body;
+      const { maxParticipants } = request.query;
       const tournament = await this.tournamentService.createTournament(
         name,
-        request.user.userId
+        request.user.userId,
+        undefined,
+        maxParticipants
       );
       return reply.status(200).send(tournament);
     } catch (error) {

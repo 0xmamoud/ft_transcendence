@@ -2,6 +2,8 @@ import { BaseComponent } from "@/core/components";
 import { authService } from "@/features/auth/auth.service";
 import { twoFactorService } from "@/features/shared/twoFactor.service";
 import { router } from "@/main";
+import "@/shared/components/error-container";
+
 class RegisterPage extends BaseComponent {
   private errorContainer: HTMLElement | null = null;
   private registerForm: HTMLElement | null = null;
@@ -11,34 +13,25 @@ class RegisterPage extends BaseComponent {
     super();
   }
 
-  private setError(message: string) {
-    if (!this.errorContainer) {
-      this.errorContainer = this.querySelector(".error-container");
-    }
+  connectedCallback() {
+    super.connectedCallback();
+    this.setupForms();
+    this.setupEventListeners();
+  }
 
+  private setupForms() {
+    this.errorContainer = this.querySelector("#registerError");
+    this.registerForm = this.querySelector(".register-form");
+    this.twoFactorForm = this.querySelector(".verify-form");
+  }
+
+  private setError(message: string) {
     if (this.errorContainer) {
-      if (message) {
-        this.errorContainer.innerHTML = `
-          <div class="p-4 text-sm text-red-500 bg-red-100 rounded-md">
-            ${message}
-          </div>
-        `;
-        this.errorContainer.style.display = "block";
-      } else {
-        this.errorContainer.innerHTML = "";
-        this.errorContainer.style.display = "none";
-      }
+      this.errorContainer.setAttribute("props", JSON.stringify({ message }));
     }
   }
 
   private showTwoFactorForm() {
-    if (!this.registerForm) {
-      this.registerForm = this.querySelector(".register-form");
-    }
-    if (!this.twoFactorForm) {
-      this.twoFactorForm = this.querySelector(".verify-form");
-    }
-
     if (this.registerForm && this.twoFactorForm) {
       this.registerForm.style.display = "none";
       this.twoFactorForm.style.display = "block";
@@ -56,8 +49,7 @@ class RegisterPage extends BaseComponent {
     }
   }
 
-  connectedCallback() {
-    super.connectedCallback();
+  private setupEventListeners() {
     const registerForm = this.querySelector(".register-form");
     const verifyForm = this.querySelector(".verify-form");
 
@@ -133,7 +125,7 @@ class RegisterPage extends BaseComponent {
     this.innerHTML = /* html */ `
       <section class="flex items-center justify-center padding">
         <div class="flex flex-col p-8 gap-6 mx-auto w-full max-w-md bg-background rounded-lg border border-secondary shadow-lg">
-          <div class="error-container" style="display: none;"></div>
+          <error-container id="registerError" props='{"message":""}'></error-container>
 
           <form class="register-form flex flex-col gap-6">
             <div class="text-center">

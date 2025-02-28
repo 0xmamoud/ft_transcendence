@@ -1,6 +1,7 @@
 import { BaseComponent } from "@/core/components";
 import { authService } from "@/features/auth/auth.service";
 import { router } from "@/main";
+import "@/shared/components/error-container";
 
 class LoginPage extends BaseComponent {
   private errorContainer: HTMLElement | null = null;
@@ -12,42 +13,32 @@ class LoginPage extends BaseComponent {
     super();
   }
 
-  private setError(message: string) {
-    if (!this.errorContainer) {
-      this.errorContainer = this.querySelector(".error-container");
-    }
+  connectedCallback() {
+    super.connectedCallback();
+    this.setupForms();
+    this.setupEventListeners();
+  }
 
+  private setupForms() {
+    this.errorContainer = this.querySelector("#loginError");
+    this.loginForm = this.querySelector(".login-form");
+    this.twoFactorForm = this.querySelector(".verify-form");
+  }
+
+  private setError(message: string) {
     if (this.errorContainer) {
-      if (message) {
-        this.errorContainer.innerHTML = `
-          <div class="p-4 text-sm text-red-500 bg-red-100 rounded-md">
-            ${message}
-          </div>
-        `;
-        this.errorContainer.style.display = "block";
-      } else {
-        this.errorContainer.innerHTML = "";
-        this.errorContainer.style.display = "none";
-      }
+      this.errorContainer.setAttribute("props", JSON.stringify({ message }));
     }
   }
 
   private showTwoFactorForm() {
-    if (!this.loginForm) {
-      this.loginForm = this.querySelector(".login-form");
-    }
-    if (!this.twoFactorForm) {
-      this.twoFactorForm = this.querySelector(".verify-form");
-    }
-
     if (this.loginForm && this.twoFactorForm) {
       this.loginForm.style.display = "none";
       this.twoFactorForm.style.display = "block";
     }
   }
 
-  connectedCallback() {
-    super.connectedCallback();
+  private setupEventListeners() {
     const loginForm = this.querySelector(".login-form");
     const verifyForm = this.querySelector(".verify-form");
 
@@ -120,7 +111,7 @@ class LoginPage extends BaseComponent {
     this.innerHTML = /* html */ `
       <section class="flex items-center justify-center padding">
         <div class="flex flex-col p-8 gap-6 mx-auto w-full max-w-md bg-background rounded-lg border border-secondary shadow-lg">
-          <div class="error-container" style="display: none;"></div>
+          <error-container id="loginError" props='{"message":""}'></error-container>
 
           <form class="login-form flex flex-col gap-6">
             <div class="text-center">

@@ -1,5 +1,5 @@
 import { BaseComponent } from "@/core/components";
-import { LocalGameService } from "@/features/play/localGame.service";
+import { LocalGameService } from "@/features/play/local-game/localGame.service";
 import { GAME_CONFIG, GAME_RULES } from "@/features/play/constants";
 
 class LocalGamePage extends BaseComponent {

@@ -5,7 +5,7 @@ import HomePage from "@/features/home/home.page";
 import LeaderboardPage from "@/features/leaderboard/leaderboard.page";
 import ProfilePage from "@/features/profile/profile.page";
 import PlayPage from "@/features/play/play.page";
-import LocalGamePage from "@/features/play/local-game.page";
+import LocalGamePage from "@/features/play/local-game/localGame.page";
 import LoginPage from "@/features/auth/login.page";
 import RegisterPage from "@/features/auth/register.page";
 

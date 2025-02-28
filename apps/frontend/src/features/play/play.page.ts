@@ -1,6 +1,13 @@
 import { BaseComponent } from "@/core/components";
+import { tournamentService } from "./tournament.service";
+import "@/shared/components/error-container";
 
 class PlayPage extends BaseComponent {
+  private createGameError: HTMLElement | null = null;
+  private joinGameError: HTMLElement | null = null;
+  private createTournamentError: HTMLElement | null = null;
+  private joinTournamentError: HTMLElement | null = null;
+
   constructor() {
     super();
   }
@@ -8,17 +15,52 @@ class PlayPage extends BaseComponent {
   connectedCallback() {
     super.connectedCallback();
     this.setupEventListeners();
+    this.setupErrorContainers();
   }
 
   disconnectedCallback() {
     this.removeEventListeners();
   }
 
+  private setupErrorContainers() {
+    this.createGameError = this.querySelector("#createGameError");
+    this.joinGameError = this.querySelector("#joinGameError");
+    this.createTournamentError = this.querySelector("#createTournamentError");
+    this.joinTournamentError = this.querySelector("#joinTournamentError");
+  }
+
+  private setError(container: HTMLElement | null, message: string) {
+    if (container) {
+      container.setAttribute("props", JSON.stringify({ message }));
+    }
+  }
+
   private setupEventListeners() {
+    this.setupAccordionListeners();
+    this.setupOnlineGameListeners();
+    this.setupTournamentListeners();
+  }
+
+  private setupAccordionListeners() {
     const accordionButtons = this.querySelectorAll("[data-accordion-target]");
+    accordionButtons.forEach((button) => {
+      button.addEventListener("click", this.handleAccordionClick.bind(this));
+    });
+  }
+
+  private setupOnlineGameListeners() {
     const createGameForm =
       this.querySelector<HTMLFormElement>("#createGameForm");
     const joinGameForm = this.querySelector<HTMLFormElement>("#joinGameForm");
+
+    createGameForm?.addEventListener(
+      "submit",
+      this.handleCreateTournament.bind(this)
+    );
+    joinGameForm?.addEventListener("submit", this.handleJoinGame.bind(this));
+  }
+
+  private setupTournamentListeners() {
     const createTournamentForm = this.querySelector<HTMLFormElement>(
       "#createTournamentForm"
     );
@@ -26,30 +68,42 @@ class PlayPage extends BaseComponent {
       "#joinTournamentForm"
     );
 
-    accordionButtons.forEach((button) => {
-      button.addEventListener("click", this.handleAccordionClick.bind(this));
-    });
-
-    createGameForm?.addEventListener(
-      "submit",
-      this.handleCreateGame.bind(this)
-    );
-    joinGameForm?.addEventListener("submit", this.handleJoinGame.bind(this));
     createTournamentForm?.addEventListener(
       "submit",
       this.handleCreateTournament.bind(this)
     );
     joinTournamentForm?.addEventListener(
       "submit",
-      this.handleJoinTournament.bind(this)
+      this.handleJoinGame.bind(this)
     );
   }
 
   private removeEventListeners() {
+    this.removeAccordionListeners();
+    this.removeOnlineGameListeners();
+    this.removeTournamentListeners();
+  }
+
+  private removeAccordionListeners() {
     const accordionButtons = this.querySelectorAll("[data-accordion-target]");
+    accordionButtons.forEach((button) => {
+      button.removeEventListener("click", this.handleAccordionClick.bind(this));
+    });
+  }
+
+  private removeOnlineGameListeners() {
     const createGameForm =
       this.querySelector<HTMLFormElement>("#createGameForm");
     const joinGameForm = this.querySelector<HTMLFormElement>("#joinGameForm");
+
+    createGameForm?.removeEventListener(
+      "submit",
+      this.handleCreateTournament.bind(this)
+    );
+    joinGameForm?.removeEventListener("submit", this.handleJoinGame.bind(this));
+  }
+
+  private removeTournamentListeners() {
     const createTournamentForm = this.querySelector<HTMLFormElement>(
       "#createTournamentForm"
     );
@@ -57,22 +111,13 @@ class PlayPage extends BaseComponent {
       "#joinTournamentForm"
     );
 
-    accordionButtons.forEach((button) => {
-      button.removeEventListener("click", this.handleAccordionClick.bind(this));
-    });
-
-    createGameForm?.removeEventListener(
-      "submit",
-      this.handleCreateGame.bind(this)
-    );
-    joinGameForm?.removeEventListener("submit", this.handleJoinGame.bind(this));
     createTournamentForm?.removeEventListener(
       "submit",
       this.handleCreateTournament.bind(this)
     );
     joinTournamentForm?.removeEventListener(
       "submit",
-      this.handleJoinTournament.bind(this)
+      this.handleJoinGame.bind(this)
     );
   }
 
@@ -92,48 +137,56 @@ class PlayPage extends BaseComponent {
     }
   }
 
-  private handleCreateGame(event: SubmitEvent) {
+  private async handleCreateTournament(event: SubmitEvent) {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
-    const gameName = formData.get("gameName") as string;
+    const name = (formData.get("gameName") ||
+      formData.get("tournamentName")) as string;
+    const isGame = form.id === "createGameForm";
+    const username = isGame
+      ? undefined
+      : (formData.get("creatorUsername") as string);
 
-    // TODO: Implement game creation logic
-    console.log("Creating game:", gameName);
-    window.location.href = `/online-game/create/${gameName}`;
+    try {
+      const { id } = await tournamentService.createTournament({
+        name,
+        creatorUsername: username,
+        maxParticipants: isGame ? 2 : undefined,
+      });
+      window.location.href = `/tournament/${id}`;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : `Failed to create ${isGame ? "game" : "tournament"}`;
+      const errorContainer = isGame
+        ? this.createGameError
+        : this.createTournamentError;
+      this.setError(errorContainer, errorMessage);
+    }
   }
 
-  private handleJoinGame(event: SubmitEvent) {
+  private async handleJoinGame(event: SubmitEvent) {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
-    const gameId = formData.get("gameId") as string;
+    const gameId = formData.get("gameId") || formData.get("tournamentId");
+    const isGame = form.id === "joinGameForm";
 
-    // TODO: Implement game joining logic
-    console.log("Joining game:", gameId);
-    window.location.href = `/online-game/join/${gameId}`;
-  }
-
-  private handleCreateTournament(event: SubmitEvent) {
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
-    const tournamentName = formData.get("tournamentName") as string;
-
-    // TODO: Implement tournament creation logic
-    console.log("Creating tournament:", tournamentName);
-    window.location.href = `/tournament/create/${tournamentName}`;
-  }
-
-  private handleJoinTournament(event: SubmitEvent) {
-    event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const formData = new FormData(form);
-    const tournamentId = formData.get("tournamentId") as string;
-
-    // TODO: Implement tournament joining logic
-    console.log("Joining tournament:", tournamentId);
-    window.location.href = `/tournament/join/${tournamentId}`;
+    try {
+      await tournamentService.joinTournament(Number(gameId), {
+        username: isGame ? undefined : (formData.get("username") as string),
+      });
+      window.location.href = `/tournament/${gameId}`;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to join game";
+      const errorContainer = isGame
+        ? this.joinGameError
+        : this.joinTournamentError;
+      this.setError(errorContainer, errorMessage);
+    }
   }
 
   render() {
@@ -185,6 +238,7 @@ class PlayPage extends BaseComponent {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="p-4 border border-secondary rounded-lg">
                     <h3 class="font-bold mb-4">Create Game</h3>
+                    <error-container id="createGameError" props='{"message":""}'></error-container>
                     <form id="createGameForm" class="space-y-4">
                       <div>
                         <label for="gameName" class="block mb-2">Game Name</label>
@@ -202,6 +256,7 @@ class PlayPage extends BaseComponent {
                   
                   <div class="p-4 border border-secondary rounded-lg">
                     <h3 class="font-bold mb-4">Join Game</h3>
+                    <error-container id="joinGameError" props='{"message":""}'></error-container>
                     <form id="joinGameForm" class="space-y-4">
                       <div>
                         <label for="gameId" class="block mb-2">Game ID</label>
@@ -240,6 +295,7 @@ class PlayPage extends BaseComponent {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="p-4 border border-secondary rounded-lg">
                     <h3 class="font-bold mb-4">Create Tournament</h3>
+                    <error-container id="createTournamentError" props='{"message":""}'></error-container>
                     <form id="createTournamentForm" class="space-y-4">
                       <div>
                         <label for="tournamentName" class="block mb-2">Tournament Name</label>
@@ -251,12 +307,23 @@ class PlayPage extends BaseComponent {
                           required
                         />
                       </div>
+                      <div>
+                        <label for="creatorUsername" class="block mb-2">Your Username</label>
+                        <input
+                          type="text"
+                          id="creatorUsername"
+                          name="creatorUsername"
+                          class="w-full p-2 rounded bg-background border border-secondary"
+                          required
+                        />
+                      </div>
                       <button type="submit" class="btn-primary w-full">Create Tournament</button>
                     </form>
                   </div>
                   
                   <div class="p-4 border border-secondary rounded-lg">
                     <h3 class="font-bold mb-4">Join Tournament</h3>
+                    <error-container id="joinTournamentError" props='{"message":""}'></error-container>
                     <form id="joinTournamentForm" class="space-y-4">
                       <div>
                         <label for="tournamentId" class="block mb-2">Tournament ID</label>
@@ -264,6 +331,16 @@ class PlayPage extends BaseComponent {
                           type="text"
                           id="tournamentId"
                           name="tournamentId"
+                          class="w-full p-2 rounded bg-background border border-secondary"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label for="username" class="block mb-2">Your Username</label>
+                        <input
+                          type="text"
+                          id="username"
+                          name="username"
                           class="w-full p-2 rounded bg-background border border-secondary"
                           required
                         />

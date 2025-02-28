@@ -6,7 +6,7 @@ import {
 
 class TournamentService implements ITournamentService {
   async createTournament(data: CreateTournamentDto) {
-    const url = new URL(`/api/tournaments/create`);
+    const url = new URL("/api/tournaments/create", window.location.origin);
     if (data.maxParticipants) {
       url.searchParams.append(
         "maxParticipants",

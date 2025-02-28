@@ -8,7 +8,7 @@ async function tournamentRoutes(app: FastifyInstance) {
 
   app.addHook("onRequest", app.authenticate);
 
-  app.get("/", tournamentController.getTournaments);
+  app.get("/", tournamentController.getTournaments.bind(tournamentController));
 
   app.post(
     "/create",
@@ -33,14 +33,23 @@ async function tournamentRoutes(app: FastifyInstance) {
         },
       },
     },
-    tournamentController.createTournament
+    tournamentController.createTournament.bind(tournamentController)
   );
 
-  app.get("/:id", tournamentController.getTournament);
+  app.get(
+    "/:id",
+    tournamentController.getTournament.bind(tournamentController)
+  );
 
-  app.post("/join/:id", tournamentController.joinTournament);
+  app.post(
+    "/join/:id",
+    tournamentController.joinTournament.bind(tournamentController)
+  );
 
-  app.post("/start/:id", tournamentController.startTournament);
+  app.post(
+    "/start/:id",
+    tournamentController.startTournament.bind(tournamentController)
+  );
 }
 
 export default tournamentRoutes;

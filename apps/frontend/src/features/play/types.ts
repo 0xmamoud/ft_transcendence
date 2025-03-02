@@ -3,14 +3,14 @@ interface User {
   username: string;
 }
 
-interface Participant {
+export interface Participant {
   userId: number;
   tournamentId: number;
   username: string;
   user: User;
 }
 
-interface Match {
+export interface Match {
   id: number;
   tournamentId: number;
   player1Id: number;
@@ -22,7 +22,7 @@ interface Match {
   player2: User;
 }
 
-interface Tournament {
+export interface Tournament {
   id: number;
   name: string;
   creatorId: number;
@@ -44,6 +44,9 @@ export interface JoinTournamentDto {
 
 export interface ITournamentService {
   createTournament(data: CreateTournamentDto): Promise<Tournament>;
+  getTournament(id: number): Promise<Tournament>;
   joinTournament(id: number, data?: JoinTournamentDto): Promise<Participant>;
   startTournament(id: number): Promise<Match[]>;
+  getTournamentParticipants(id: number): Promise<Participant[]>;
+  getTournamentMatches(id: number): Promise<Match[]>;
 }

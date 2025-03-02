@@ -35,6 +35,24 @@ class TournamentService implements ITournamentService {
     return responseData;
   }
 
+  async getTournament(id: number) {
+    const response = await fetch(`/api/tournaments/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Failed to get tournament: ${responseData.message}`);
+    }
+
+    return responseData;
+  }
+
   async joinTournament(id: number, data?: JoinTournamentDto) {
     const response = await fetch(`/api/tournaments/join/${id}`, {
       method: "POST",
@@ -67,6 +85,46 @@ class TournamentService implements ITournamentService {
 
     if (!response.ok) {
       throw new Error(`Failed to start tournament: ${responseData.message}`);
+    }
+
+    return responseData;
+  }
+
+  async getTournamentParticipants(id: number) {
+    const response = await fetch(`/api/tournaments/${id}/participants`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get tournament participants: ${responseData.message}`
+      );
+    }
+
+    return responseData;
+  }
+
+  async getTournamentMatches(id: number) {
+    const response = await fetch(`/api/tournaments/${id}/matches`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get tournament matches: ${responseData.message}`
+      );
     }
 
     return responseData;

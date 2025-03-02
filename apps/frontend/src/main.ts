@@ -8,6 +8,7 @@ import PlayPage from "@/features/play/play.page";
 import LocalGamePage from "@/features/play/local-game/localGame.page";
 import LoginPage from "@/features/auth/login.page";
 import RegisterPage from "@/features/auth/register.page";
+import TournamentPage from "@/features/play/tournament.page";
 
 const routes = [
   { path: "/", component: () => document.createElement("home-page") },
@@ -29,6 +30,10 @@ const routes = [
     path: "/register",
     component: () => document.createElement("register-page"),
   },
+  {
+    path: "/tournament/:id",
+    component: () => document.createElement("tournament-page"),
+  },
 ];
 
 export const router = new Router(routes);
@@ -41,6 +46,7 @@ const defineCustomElements = () => {
   customElements.define("local-game-page", LocalGamePage);
   customElements.define("login-page", LoginPage);
   customElements.define("register-page", RegisterPage);
+  customElements.define("tournament-page", TournamentPage);
 };
 
 const initMobileMenu = () => {

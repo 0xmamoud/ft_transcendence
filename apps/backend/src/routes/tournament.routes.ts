@@ -50,6 +50,16 @@ async function tournamentRoutes(app: FastifyInstance) {
     "/start/:id",
     tournamentController.startTournament.bind(tournamentController)
   );
+
+  app.get(
+    "/:id/participants",
+    tournamentController.getTournamentParticipants.bind(tournamentController)
+  );
+
+  app.get(
+    "/:id/matches",
+    tournamentController.getTournamentMatches.bind(tournamentController)
+  );
 }
 
 export default tournamentRoutes;

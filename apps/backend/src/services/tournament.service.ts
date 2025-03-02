@@ -236,4 +236,58 @@ export class TournamentService {
       },
     });
   }
+
+  async getTournamentParticipants(tournamentId: number) {
+    const tournament = await this.app.db.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        participants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!tournament) {
+      throw new Error("Tournament not found");
+    }
+
+    return tournament.participants;
+  }
+
+  async getTournamentMatches(tournamentId: number) {
+    const tournament = await this.app.db.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        matches: {
+          include: {
+            player1: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+            player2: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!tournament) {
+      throw new Error("Tournament not found");
+    }
+
+    return tournament.matches;
+  }
 }

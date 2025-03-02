@@ -88,4 +88,33 @@ export class TournamentController {
       return reply.status(500).send({ message: (error as Error).message });
     }
   }
+
+  async getTournamentParticipants(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const participants =
+        await this.tournamentService.getTournamentParticipants(Number(id));
+      return reply.status(200).send(participants);
+    } catch (error) {
+      return reply.status(500).send({ message: (error as Error).message });
+    }
+  }
+
+  async getTournamentMatches(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const { id } = request.params;
+      const matches = await this.tournamentService.getTournamentMatches(
+        Number(id)
+      );
+      return reply.status(200).send(matches);
+    } catch (error) {
+      return reply.status(500).send({ message: (error as Error).message });
+    }
+  }
 }

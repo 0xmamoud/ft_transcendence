@@ -75,9 +75,6 @@ class TournamentService implements ITournamentService {
   async startTournament(id: number) {
     const response = await fetch(`/api/tournaments/start/${id}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       credentials: "include",
     });
 

@@ -33,6 +33,7 @@ class TournamentPage extends ParamsBaseComponent {
       await this.loadUserProfile();
       await this.loadTournament();
       await this.setupWebSocket();
+      console.log("setupWebSocket");
       this.render();
     } catch (error) {
       console.error("Failed to initialize tournament page:", error);
@@ -85,7 +86,7 @@ class TournamentPage extends ParamsBaseComponent {
         this.tournamentParticipants.find((p) => p.userId === this.currentUser)
           ?.username || this.defaultUsername;
 
-      // this.render();
+      this.render();
     } catch (error) {
       console.error("Failed to load participants:", error);
     }
@@ -210,7 +211,16 @@ class TournamentPage extends ParamsBaseComponent {
       const tournamentId = Number(this.params.id);
       await tournamentService.startTournament(tournamentId);
 
+      // Update local tournament state
+      if (this.tournament) {
+        this.tournament.status = "IN_PROGRESS";
+      }
+
+      // Emit socket event
       this.socketService?.startTournament(tournamentId);
+
+      // Force re-render to update UI
+      this.render();
     } catch (error) {
       console.error("Failed to start tournament:", error);
     }
@@ -308,11 +318,12 @@ class TournamentPage extends ParamsBaseComponent {
                     ${
                       this.tournament?.creatorId === this.currentUser &&
                       this.tournament?.status?.toLowerCase() === "pending"
-                        ? `<button
-                            class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors text-sm cursor-pointer"
-                            id="startTournamentBtn"
-                          >
-                            Start Tournament
+                        ? /* html */ `
+                    <button
+                      class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors text-sm cursor-pointer"
+                      id="startTournamentBtn"
+                    >
+                      Start Tournament
                           </button>`
                         : ""
                     }

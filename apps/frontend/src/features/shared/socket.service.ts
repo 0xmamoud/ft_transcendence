@@ -20,34 +20,27 @@ export abstract class SocketService {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        if (this.socket) {
-          if (this.socket.readyState === WebSocket.CONNECTING) {
-            this.socket.onopen = null;
-            this.socket.onclose = null;
-            this.socket.onerror = null;
-            this.socket.onmessage = null;
-          }
-          this.disconnect();
-        }
+        // if (this.socket) {
+        //   if (this.socket.readyState === WebSocket.CONNECTING) {
+        //     this.socket.onopen = null;
+        //     this.socket.onclose = null;
+        //     this.socket.onerror = null;
+        //     this.socket.onmessage = null;
+        //   }
+        //   this.disconnect();
+        // }
 
         const wsUrl = `${
           window.location.protocol === "https:" ? "wss:" : "ws:"
         }//${window.location.host}/${this.path}`;
-        console.log("Connecting to WebSocket:", wsUrl);
         this.socket = new WebSocket(wsUrl);
-        console.log("Socket initial state:", {
-          readyState: this.socket.readyState,
-          protocol: this.socket.protocol,
-          extensions: this.socket.extensions,
-          url: this.socket.url,
-        });
+        console.log("socket", this.socket);
 
         this.socket.onopen = () => {
           console.log("WebSocket OPEN - Connection established");
           this.reconnectAttempts = 0;
           resolve();
         };
-        console.log("WebSocket onopen:", this.socket.onopen);
 
         this.socket.onmessage = (event) => {
           console.log("WebSocket MESSAGE received:", event.data);
@@ -83,6 +76,11 @@ export abstract class SocketService {
             this.handleReconnect();
           }
         };
+        setTimeout(() => {
+          if (this.socket?.readyState === WebSocket.CONNECTING) {
+            this.handleReconnect();
+          }
+        }, 2000);
       } catch (error) {
         console.error("Error connecting to WebSocket:", error);
         reject(error);

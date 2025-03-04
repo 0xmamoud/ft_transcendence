@@ -58,7 +58,9 @@ export class TournamentParticipants extends PropsBaseComponent {
                 `
                     )
                     .join("")
-                : `<div class="text-center text-gray-500 py-4">Aucun participant</div>`
+                : /* html */ `
+          <div class="text-center text-gray-500 py-4">No participants</div>
+        `
             }
           </div>
         </div>

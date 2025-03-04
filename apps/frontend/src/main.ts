@@ -76,12 +76,30 @@ const init = () => {
   initMobileMenu();
 };
 
+// Fonction pour nettoyer les connexions WebSocket avant le reload
+// const cleanupWebSockets = () => {
+//   // Récupérer tous les éléments tournament-page
+//   const tournamentPages = document.querySelectorAll("tournament-page");
+//   tournamentPages.forEach((page: any) => {
+//     if (page.cleanupWebSocket) {
+//       page.cleanupWebSocket();
+//     }
+//   });
+// };
+
 document.addEventListener("DOMContentLoaded", init);
 
-// Add HMR support
+// Amélioration du support HMR
 if (import.meta.hot) {
+  // import.meta.hot.on("vite:beforeUpdate", () => {
+  //   // Nettoyer les WebSockets avant la mise à jour
+  //   cleanupWebSockets();
+  // });
+
   import.meta.hot.accept((newModule) => {
-    // Force page reload when components are updated
+    // Nettoyer les WebSockets
+    // cleanupWebSockets();
+    // Forcer le rechargement de la page
     window.location.reload();
   });
 }

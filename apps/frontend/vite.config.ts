@@ -9,4 +9,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    hmr: {
+      timeout: 5000,
+      protocol: "ws",
+      overlay: false,
+    },
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
+  },
 });

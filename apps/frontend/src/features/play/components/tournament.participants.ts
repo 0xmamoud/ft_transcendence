@@ -9,39 +9,15 @@ interface Participant {
 
 interface ParticipantsProps {
   participants: Participant[];
-  tournamentStatus: "pending" | "in_progress" | "completed";
   isCreator?: boolean;
-  startTournament?: boolean;
 }
 
 export class TournamentParticipants extends PropsBaseComponent {
-  private handleStartTournament = () => {
-    // Déclencher un événement personnalisé
-    this.dispatchEvent(new CustomEvent("startTournament"));
-  };
-
-  connectedCallback() {
-    super.connectedCallback();
-    const startButton = this.querySelector("#startTournamentBtn");
-    startButton?.addEventListener("click", this.handleStartTournament);
-  }
-
-  disconnectedCallback() {
-    const startButton = this.querySelector("#startTournamentBtn");
-    startButton?.removeEventListener("click", this.handleStartTournament);
-  }
-
   render() {
-    // Conversion explicite pour éviter l'erreur de type
     const props = JSON.parse(
       JSON.stringify(this.props)
     ) as unknown as ParticipantsProps;
-    const {
-      participants = [],
-      tournamentStatus,
-      isCreator,
-      startTournament,
-    } = props;
+    const { participants = [] } = props;
 
     this.innerHTML = /* html */ `
       <div class="h-fit">
@@ -54,19 +30,11 @@ export class TournamentParticipants extends PropsBaseComponent {
           </button>
         </div>
 
-        <!-- Participants List -->
         <div class="hidden lg:block max-h-[300px] overflow-y-auto" id="participantsList">
           <div class="flex justify-between items-center mb-2">
             <h3 class="font-bold text-sm">Participants (${
               participants.length
             })</h3>
-            ${
-              isCreator && tournamentStatus === "pending" && startTournament
-                ? /* html */ `
-              <button id="startTournamentBtn" class="btn-primary btn-sm">Start Tournament</button>
-            `
-                : ""
-            }
           </div>
           <div class="space-y-2">
             ${

@@ -31,10 +31,6 @@ class TournamentPage extends ParamsBaseComponent {
 
     try {
       await this.loadUserProfile();
-      console.log("User profile loaded:", {
-        currentUser: this.currentUser,
-        defaultUsername: this.defaultUsername,
-      });
       await this.loadTournament();
       await this.setupWebSocket();
       this.render();
@@ -60,10 +56,6 @@ class TournamentPage extends ParamsBaseComponent {
     const userProfile = await userService.getUserProfile();
     this.currentUser = userProfile.id;
     this.defaultUsername = userProfile.username;
-    console.log("User profile loaded:", {
-      currentUser: this.currentUser,
-      defaultUsername: this.defaultUsername,
-    });
   }
 
   private async loadTournament() {
@@ -78,12 +70,6 @@ class TournamentPage extends ParamsBaseComponent {
             (p) => p.userId === this.currentUser
           )?.username || this.defaultUsername;
       }
-      console.log("Tournament loaded:", {
-        creatorId: this.tournament?.creatorId,
-        currentUser: this.currentUser,
-        status: this.tournament?.status,
-        isCreator: this.tournament?.creatorId === this.currentUser,
-      });
     } catch (error) {
       console.error("Failed to load tournament:", error);
     }
@@ -99,7 +85,7 @@ class TournamentPage extends ParamsBaseComponent {
         this.tournamentParticipants.find((p) => p.userId === this.currentUser)
           ?.username || this.defaultUsername;
 
-      this.render();
+      // this.render();
     } catch (error) {
       console.error("Failed to load participants:", error);
     }
@@ -242,14 +228,9 @@ class TournamentPage extends ParamsBaseComponent {
   }
 
   private setupEventListeners(): void {
-    const participantsComponent = this.querySelector("tournament-participants");
+    // const participantsComponent = this.querySelector("tournament-participants");
     const chatComponent = this.querySelector("tournament-chat");
     const startTournamentBtn = this.querySelector("#startTournamentBtn");
-
-    participantsComponent?.addEventListener(
-      "startTournament",
-      this.handleStartTournament.bind(this)
-    );
 
     chatComponent?.addEventListener(
       "sendMessage",
@@ -287,8 +268,7 @@ class TournamentPage extends ParamsBaseComponent {
     const currentMatch = this.tournamentMatches.find(
       (match) => match.status === "IN_PROGRESS"
     );
-    console.log("this.tournament?.creatorId", this.tournament?.creatorId);
-    console.log("this.currentUser", this.currentUser);
+
     this.innerHTML = /* html */ `
       <section class="min-h-screen padding-y">
         <div class="padding-x">
@@ -355,10 +335,8 @@ class TournamentPage extends ParamsBaseComponent {
                           isOnline: true,
                         })
                       ),
-                      tournamentStatus: this.tournament?.status?.toLowerCase(),
                       isCreator:
                         this.tournament?.creatorId === this.currentUser,
-                      startTournament: true,
                     }).replace(/'/g, "&apos;")}'
                   ></tournament-participants>
                 </div>

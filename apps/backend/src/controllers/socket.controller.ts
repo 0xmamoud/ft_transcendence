@@ -34,10 +34,10 @@ export class SocketController {
       }
     });
 
-    socket.on("close", () => {
-      console.log("Tournament socket disconnected for user:", userId);
-      this.socketService.removeClient(socket);
-    });
+    // socket.on("close", () => {
+    //   console.log("Tournament socket disconnected for user:", userId);
+    //   this.socketService.removeClient(socket);
+    // });
 
     socket.on("error", (error) => {
       console.error("Tournament socket error for user:", userId, error);

@@ -23,6 +23,7 @@ help:
 dev:
 	@echo "$(GREEN)Démarrage en mode développement...$(RESET)"
 	@$(DC) -f docker-compose.dev.yml up -d --build
+	@$(DC) -f docker-compose.dev.yml logs -f backend
 	@echo "$(GREEN)Les conteneurs sont démarrés en mode développement !$(RESET)"
 
 prod:

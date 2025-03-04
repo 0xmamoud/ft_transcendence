@@ -6,11 +6,13 @@ interface ChatMessage {
   message: string;
   timestamp: string;
   isOnline: boolean;
+  isCurrentUser?: boolean;
+  isSystem?: boolean;
 }
 
 interface ChatProps {
   messages: ChatMessage[];
-  onSendMessage?: (message: string) => void;
+  currentUsername?: string;
 }
 
 export class TournamentChat extends PropsBaseComponent {
@@ -19,8 +21,9 @@ export class TournamentChat extends PropsBaseComponent {
     const input = this.querySelector('input[type="text"]') as HTMLInputElement;
     const message = input.value.trim();
 
-    if (message && this.props.onSendMessage) {
-      this.props.onSendMessage(message);
+    if (message) {
+      // Déclencher un événement personnalisé
+      this.dispatchEvent(new CustomEvent("sendMessage", { detail: message }));
       input.value = "";
     }
   };
@@ -37,7 +40,16 @@ export class TournamentChat extends PropsBaseComponent {
   }
 
   render() {
-    const { messages = [] } = this.props as ChatProps;
+    const props = JSON.parse(
+      JSON.stringify(this.props)
+    ) as unknown as ChatProps;
+    const { messages = [], currentUsername = "" } = props;
+
+    const processedMessages = messages.map((message) => ({
+      ...message,
+      isCurrentUser: message.username === currentUsername,
+      isSystem: message.username === "System",
+    }));
 
     this.innerHTML = /* html */ `
       <div class="h-full flex flex-col">
@@ -52,18 +64,51 @@ export class TournamentChat extends PropsBaseComponent {
         
         <!-- Chat Messages -->
         <div class="hidden lg:block flex-1 overflow-y-auto mb-4 space-y-4" id="chatMessages">
-          ${messages
+          ${processedMessages
             .map(
               (message) => /* html */ `
-            <div class="chat-message">
-              <div class="flex items-center gap-2 mb-1">
+            <div class="chat-message ${
+              message.isCurrentUser
+                ? "ml-auto"
+                : message.isSystem
+                ? "mx-auto max-w-[80%]"
+                : "mr-auto"
+            } ${message.isSystem ? "text-center" : ""} max-w-[70%]">
+              <div class="flex items-center gap-2 mb-1 ${
+                message.isCurrentUser
+                  ? "justify-end"
+                  : message.isSystem
+                  ? "justify-center"
+                  : "justify-start"
+              }">
+                ${
+                  !message.isCurrentUser && !message.isSystem
+                    ? `
                 <div class="w-1.5 h-1.5 rounded-full ${
                   message.isOnline ? "bg-green-500" : "bg-gray-500"
                 }"></div>
+                `
+                    : ""
+                }
                 <div class="text-sm font-semibold">${message.username}</div>
                 <div class="text-xs text-gray-500">${message.timestamp}</div>
+                ${
+                  message.isCurrentUser
+                    ? `
+                <div class="w-1.5 h-1.5 rounded-full ${
+                  message.isOnline ? "bg-green-500" : "bg-gray-500"
+                }"></div>
+                `
+                    : ""
+                }
               </div>
-              <div class="bg-secondary/50 rounded-lg p-2 text-sm">
+              <div class="rounded-lg p-2 text-sm ${
+                message.isCurrentUser
+                  ? "bg-primary/20 text-white rounded-tr-none"
+                  : message.isSystem
+                  ? "bg-gray-200 text-gray-800"
+                  : "bg-secondary/50 rounded-tl-none"
+              }">
                 ${message.message}
               </div>
             </div>
@@ -89,6 +134,12 @@ export class TournamentChat extends PropsBaseComponent {
         </form>
       </div>
     `;
+
+    // Faire défiler automatiquement vers le bas pour voir les derniers messages
+    const chatMessages = this.querySelector("#chatMessages");
+    if (chatMessages) {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
   }
 }
 

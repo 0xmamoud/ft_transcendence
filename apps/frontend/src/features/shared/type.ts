@@ -1,4 +1,5 @@
 export interface UserPublicProfile {
+  id: number;
   username: string;
   avatar: string | null;
 }

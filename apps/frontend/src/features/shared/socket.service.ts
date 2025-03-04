@@ -13,22 +13,44 @@ export abstract class SocketService {
     this.eventHandlers = new Map();
   }
 
+  isConnected(): boolean {
+    return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
+  }
+
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        if (this.socket) {
+          if (this.socket.readyState === WebSocket.CONNECTING) {
+            this.socket.onopen = null;
+            this.socket.onclose = null;
+            this.socket.onerror = null;
+            this.socket.onmessage = null;
+          }
+          this.disconnect();
+        }
+
         const wsUrl = `${
           window.location.protocol === "https:" ? "wss:" : "ws:"
         }//${window.location.host}/${this.path}`;
-
+        console.log("Connecting to WebSocket:", wsUrl);
         this.socket = new WebSocket(wsUrl);
+        console.log("Socket initial state:", {
+          readyState: this.socket.readyState,
+          protocol: this.socket.protocol,
+          extensions: this.socket.extensions,
+          url: this.socket.url,
+        });
 
         this.socket.onopen = () => {
-          console.log("WebSocket connection established");
+          console.log("WebSocket OPEN - Connection established");
           this.reconnectAttempts = 0;
           resolve();
         };
+        console.log("WebSocket onopen:", this.socket.onopen);
 
         this.socket.onmessage = (event) => {
+          console.log("WebSocket MESSAGE received:", event.data);
           try {
             const message: TournamentSocketEvent = JSON.parse(event.data);
             this.handleMessage(message);
@@ -38,13 +60,28 @@ export abstract class SocketService {
         };
 
         this.socket.onclose = (event) => {
-          console.log("WebSocket connection closed:", event.code, event.reason);
-          this.handleReconnect();
+          console.log("WebSocket CLOSE:", {
+            code: event.code,
+            reason: event.reason,
+            wasClean: event.wasClean,
+          });
+          if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            reject(new Error("Maximum reconnection attempts reached"));
+          } else {
+            this.handleReconnect();
+          }
         };
 
         this.socket.onerror = (error) => {
-          console.error("WebSocket error:", error);
-          reject(error);
+          console.error("WebSocket ERROR:", {
+            error,
+            readyState: this.socket?.readyState,
+          });
+          if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+            reject(error);
+          } else {
+            this.handleReconnect();
+          }
         };
       } catch (error) {
         console.error("Error connecting to WebSocket:", error);
@@ -60,10 +97,10 @@ export abstract class SocketService {
     }
 
     this.reconnectAttempts++;
-    const delay = 2000;
+    const delay = 1000;
 
     console.log(
-      `Reconnecting in 2s (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+      `Reconnecting in 1s (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
     );
 
     this.reconnectTimeout = window.setTimeout(() => {

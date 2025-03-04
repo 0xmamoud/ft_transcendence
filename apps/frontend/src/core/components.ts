@@ -21,7 +21,11 @@ export abstract class AttributeBaseComponent<
   protected updateData() {
     const value = this.getAttribute(this.attributeName);
     if (!value) return;
-    this.data = JSON.parse(value);
+    try {
+      this.data = JSON.parse(value);
+    } catch (error) {
+      console.error(`Error parsing ${this.attributeName}:`, error);
+    }
   }
 }
 
@@ -48,7 +52,7 @@ export class ParamsBaseComponent extends AttributeBaseComponent<
 }
 
 export class PropsBaseComponent extends BaseComponent {
-  declare props: Record<string, string>;
+  declare props: Record<string, any>;
 
   constructor() {
     super();
@@ -73,6 +77,20 @@ export class PropsBaseComponent extends BaseComponent {
   updateProps() {
     const props = this.getAttribute("props");
     if (!props) return;
-    this.props = JSON.parse(props);
+    try {
+      // Remplacer les entités HTML par leurs caractères correspondants
+      const decodedProps = props
+        .replace(/&apos;/g, "'")
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">");
+
+      this.props = JSON.parse(decodedProps);
+    } catch (error) {
+      console.error("Error parsing props:", error, props);
+      // Initialiser avec un objet vide en cas d'erreur
+      this.props = {};
+    }
   }
 }

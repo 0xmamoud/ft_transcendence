@@ -28,16 +28,20 @@ class TournamentPage extends ParamsBaseComponent {
   async connectedCallback() {
     this.innerHTML = `<div class="loading">Chargement...</div>`;
     super.connectedCallback();
+
     try {
-      const userProfile = await userService.getUserProfile();
-      this.currentUser = userProfile.id;
-      this.defaultUsername = userProfile.username;
+      await this.loadUserProfile();
+      console.log("User profile loaded:", {
+        currentUser: this.currentUser,
+        defaultUsername: this.defaultUsername,
+      });
+      await this.loadTournament();
+      await this.setupWebSocket();
+      this.render();
     } catch (error) {
-      console.error("Failed to load user profile:", error);
+      console.error("Failed to initialize tournament page:", error);
       router.navigateTo("/login");
     }
-    await this.loadTournament();
-    await this.setupWebSocket();
   }
 
   disconnectedCallback() {
@@ -52,6 +56,16 @@ class TournamentPage extends ParamsBaseComponent {
     this.cleanupWebSocket();
   }
 
+  private async loadUserProfile() {
+    const userProfile = await userService.getUserProfile();
+    this.currentUser = userProfile.id;
+    this.defaultUsername = userProfile.username;
+    console.log("User profile loaded:", {
+      currentUser: this.currentUser,
+      defaultUsername: this.defaultUsername,
+    });
+  }
+
   private async loadTournament() {
     try {
       const tournamentId = Number(this.params.id);
@@ -64,8 +78,12 @@ class TournamentPage extends ParamsBaseComponent {
             (p) => p.userId === this.currentUser
           )?.username || this.defaultUsername;
       }
-      console.log(this.tournament);
-      this.render();
+      console.log("Tournament loaded:", {
+        creatorId: this.tournament?.creatorId,
+        currentUser: this.currentUser,
+        status: this.tournament?.status,
+        isCreator: this.tournament?.creatorId === this.currentUser,
+      });
     } catch (error) {
       console.error("Failed to load tournament:", error);
     }
@@ -76,6 +94,11 @@ class TournamentPage extends ParamsBaseComponent {
       const tournamentId = Number(this.params.id);
       this.tournamentParticipants =
         await tournamentService.getTournamentParticipants(tournamentId);
+
+      this.currentUsername =
+        this.tournamentParticipants.find((p) => p.userId === this.currentUser)
+          ?.username || this.defaultUsername;
+
       this.render();
     } catch (error) {
       console.error("Failed to load participants:", error);
@@ -264,7 +287,8 @@ class TournamentPage extends ParamsBaseComponent {
     const currentMatch = this.tournamentMatches.find(
       (match) => match.status === "IN_PROGRESS"
     );
-
+    console.log("this.tournament?.creatorId", this.tournament?.creatorId);
+    console.log("this.currentUser", this.currentUser);
     this.innerHTML = /* html */ `
       <section class="min-h-screen padding-y">
         <div class="padding-x">
@@ -301,12 +325,17 @@ class TournamentPage extends ParamsBaseComponent {
                         ${this.tournament?.status?.toLowerCase() || "unknown"}
                       </span>
                     </div>
-                    <button
+                    ${
+                      this.tournament?.creatorId === this.currentUser &&
+                      this.tournament?.status?.toLowerCase() === "pending"
+                        ? `<button
                             class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors text-sm cursor-pointer"
                             id="startTournamentBtn"
                           >
                             Start Tournament
-                    </button>
+                          </button>`
+                        : ""
+                    }
                   </div>
                 </div>
               </div>

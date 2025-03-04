@@ -12,9 +12,11 @@ export class SocketController {
   setupTournamentSocket(socket: WebSocket, request: FastifyRequest): void {
     const userId = request.user.userId;
     this.socketService.addClient(socket, userId);
+    console.log("Tournament socket connected for user:", userId);
 
     socket.on("message", (rawMessage) => {
       try {
+        console.log("Message received:", rawMessage.toString());
         const { event, data } = JSON.parse(rawMessage.toString());
 
         const handler = this.eventHandlerService.getEventHandler(event);
@@ -30,6 +32,16 @@ export class SocketController {
           })
         );
       }
+    });
+
+    socket.on("close", () => {
+      console.log("Tournament socket disconnected for user:", userId);
+      this.socketService.removeClient(socket);
+    });
+
+    socket.on("error", (error) => {
+      console.error("Tournament socket error for user:", userId, error);
+      this.socketService.removeClient(socket);
     });
   }
 

@@ -32,8 +32,9 @@ class TournamentPage extends ParamsBaseComponent {
       await this.loadUserProfile();
       await this.loadTournament();
       await this.setupWebSocket();
-      // console.log("setupWebSocket");
       this.render();
+      this.setupMobileToggles();
+      this.setupEventListeners();
     } catch (error) {
       console.error("Failed to initialize tournament page:", error);
       router.navigateTo("/login");
@@ -118,7 +119,6 @@ class TournamentPage extends ParamsBaseComponent {
 
   private setupSocketEventListeners() {
     tournamentSocket.on("tournament:join", (data) => {
-      // console.log("User joined tournament:", data);
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -130,7 +130,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:leave", (data) => {
-      // console.log("User left tournament:", data);
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -142,7 +141,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:start", (data) => {
-      // console.log("Tournament started:", data);
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -155,7 +153,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:finish", (data) => {
-      // console.log("Tournament finished:", data);
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -167,7 +164,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:chat", (data) => {
-      // console.log("Chat message received:", data);
       const participant = this.tournamentParticipants.find(
         (p) => p.userId === data.userId
       );
@@ -221,17 +217,6 @@ class TournamentPage extends ParamsBaseComponent {
     }
   }
 
-  private handleSendMessage(message: string) {
-    if (!message.trim()) return;
-
-    const tournamentId = Number(this.params.id);
-    tournamentSocket.sendChatMessage(tournamentId, message);
-  }
-
-  private handleSendMessageEvent(e: Event): void {
-    this.handleSendMessage((e as CustomEvent).detail);
-  }
-
   private setupEventListeners(): void {
     const startTournamentBtn = this.querySelector("#startTournamentBtn");
 
@@ -266,7 +251,6 @@ class TournamentPage extends ParamsBaseComponent {
     const currentMatch = this.tournamentMatches.find(
       (match) => match.status === "IN_PROGRESS"
     );
-    // console.log("currentMatch", currentMatch);
 
     this.innerHTML = /* html */ `
       <section class="min-h-screen padding-y">
@@ -401,17 +385,6 @@ class TournamentPage extends ParamsBaseComponent {
         </div>
       </section>
     `;
-
-    // Après le rendu, on récupère le composant tournament-game et on lui passe le socketService
-    const gameComponent = this.querySelector("tournament-game");
-    if (gameComponent) {
-      const props = JSON.parse(gameComponent.getAttribute("props") || "{}");
-      delete props.socketService; // Remove from JSON props
-      gameComponent.setAttribute("props", JSON.stringify(props));
-    }
-
-    this.setupMobileToggles();
-    this.setupEventListeners();
   }
 }
 

@@ -8,7 +8,6 @@ export interface TournamentSocketEvent {
 
 class TournamentSocketService extends SocketService {
   private isInitialized: boolean = false;
-
   constructor() {
     super("ws");
   }

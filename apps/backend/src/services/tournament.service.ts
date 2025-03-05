@@ -148,6 +148,14 @@ export class TournamentService {
       }
     }
 
+    if (matches.length > 0) {
+      const firstMatch = await this.app.db.match.update({
+        where: { id: matches[0].id },
+        data: { status: "IN_PROGRESS" },
+      });
+      matches[0] = firstMatch;
+    }
+
     return matches;
   }
 
@@ -289,5 +297,72 @@ export class TournamentService {
     }
 
     return tournament.matches;
+  }
+
+  async finishMatch(matchId: number, winnerId: number) {
+    // 1. Mettre à jour le match actuel
+    const currentMatch = await this.app.db.match.update({
+      where: { id: matchId },
+      data: {
+        status: "COMPLETED",
+        winnerId: winnerId,
+      },
+    });
+
+    // 2. Trouver le prochain match en attente dans le même tournoi
+    const nextMatch = await this.app.db.match.findFirst({
+      where: {
+        tournamentId: currentMatch.tournamentId,
+        status: "PENDING",
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+
+    // 3. Si on trouve un match en attente, le mettre en IN_PROGRESS
+    if (nextMatch) {
+      await this.app.db.match.update({
+        where: { id: nextMatch.id },
+        data: { status: "IN_PROGRESS" },
+      });
+      return nextMatch;
+    }
+
+    // 4. Si pas de match suivant, terminer le tournoi
+    const allMatches = await this.app.db.match.findMany({
+      where: {
+        tournamentId: currentMatch.tournamentId,
+      },
+    });
+
+    const allCompleted = allMatches.every(
+      (match) => match.status === "COMPLETED"
+    );
+    if (allCompleted) {
+      await this.finishTournament(currentMatch.tournamentId);
+    }
+
+    return null;
+  }
+
+  async getMatch(matchId: number) {
+    return await this.app.db.match.findUnique({
+      where: { id: matchId },
+      include: {
+        player1: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        player2: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
   }
 }

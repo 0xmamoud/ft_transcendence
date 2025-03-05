@@ -1,4 +1,5 @@
 import { PropsBaseComponent } from "@/core/components";
+import { tournamentSocket } from "@/features/play/tournament.socket.service";
 
 interface ChatMessage {
   id: string;
@@ -13,23 +14,29 @@ interface ChatMessage {
 interface ChatProps {
   messages: ChatMessage[];
   currentUsername?: string;
+  tournamentId: number;
 }
 
 export class TournamentChat extends PropsBaseComponent {
   private handleSubmit = (event: Event) => {
     event.preventDefault();
-    const input = this.querySelector('input[type="text"]') as HTMLInputElement;
-    const message = input.value.trim();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const message = formData.get("message") as string;
+    const { tournamentId } = this.props as ChatProps;
 
-    if (message) {
-      // Déclencher un événement personnalisé
-      this.dispatchEvent(new CustomEvent("sendMessage", { detail: message }));
-      input.value = "";
+    if (message?.trim() && tournamentId) {
+      tournamentSocket.sendChatMessage(tournamentId, message.trim());
+      form.reset();
     }
   };
 
   connectedCallback() {
     super.connectedCallback();
+    this.setupEventListeners();
+  }
+
+  private setupEventListeners() {
     const form = this.querySelector("form");
     form?.addEventListener("submit", this.handleSubmit);
   }
@@ -122,6 +129,7 @@ export class TournamentChat extends PropsBaseComponent {
           <div class="relative">
             <input
               type="text"
+              name="message"
               placeholder="Type a message..."
               class="w-full p-2 pr-10 rounded bg-background border border-secondary text-sm"
             />
@@ -134,12 +142,6 @@ export class TournamentChat extends PropsBaseComponent {
         </form>
       </div>
     `;
-
-    // Faire défiler automatiquement vers le bas pour voir les derniers messages
-    const chatMessages = this.querySelector("#chatMessages");
-    if (chatMessages) {
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
   }
 }
 

@@ -1,11 +1,19 @@
 import { FastifyInstance } from "fastify";
 import { SocketService } from "#services/socket.service";
 import { EventHandlerService } from "#services/EventHandler.service";
+import { GameService } from "#services/game.service";
+import { TournamentService } from "#services/tournament.service";
 import { SocketController } from "#controllers/socket.controller";
 
 async function websocketRoutes(app: FastifyInstance) {
   const socketService = new SocketService();
-  const eventHandlerService = new EventHandlerService(socketService);
+  const gameService = new GameService();
+  const tournamentService = new TournamentService(app);
+  const eventHandlerService = new EventHandlerService(
+    socketService,
+    gameService,
+    tournamentService
+  );
   const socketController = new SocketController(
     socketService,
     eventHandlerService

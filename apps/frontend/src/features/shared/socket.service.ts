@@ -34,16 +34,16 @@ export abstract class SocketService {
           window.location.protocol === "https:" ? "wss:" : "ws:"
         }//${window.location.host}/${this.path}`;
         this.socket = new WebSocket(wsUrl);
-        console.log("socket", this.socket);
+        // console.log("socket", this.socket);
 
         this.socket.onopen = () => {
-          console.log("WebSocket OPEN - Connection established");
+          // console.log("WebSocket OPEN - Connection established");
           this.reconnectAttempts = 0;
           resolve();
         };
 
         this.socket.onmessage = (event) => {
-          console.log("WebSocket MESSAGE received:", event.data);
+          // console.log("WebSocket MESSAGE received:", event.data);
           try {
             const message: TournamentSocketEvent = JSON.parse(event.data);
             this.handleMessage(message);
@@ -53,11 +53,11 @@ export abstract class SocketService {
         };
 
         this.socket.onclose = (event) => {
-          console.log("WebSocket CLOSE:", {
-            code: event.code,
-            reason: event.reason,
-            wasClean: event.wasClean,
-          });
+          // console.log("WebSocket CLOSE:", {
+          //   code: event.code,
+          //   reason: event.reason,
+          //   wasClean: event.wasClean,
+          // });
           if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             reject(new Error("Maximum reconnection attempts reached"));
           } else {
@@ -140,7 +140,7 @@ export abstract class SocketService {
   private handleMessage(message: TournamentSocketEvent): void {
     const { event, data } = message;
 
-    console.log(`Received WebSocket event: ${event}`, data);
+    // console.log(`Received WebSocket event: ${event}`, data);
 
     const handler = this.eventHandlers.get(event);
     if (handler) {

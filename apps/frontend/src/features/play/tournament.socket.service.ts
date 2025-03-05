@@ -1,11 +1,25 @@
 import { SocketService } from "@/features/shared/socket.service";
+import { GameState } from "./game.service";
 
 export interface TournamentSocketEvent {
   event: string;
   data: any;
 }
 
-export class TournamentSocketService extends SocketService {
+class TournamentSocketService extends SocketService {
+  private isInitialized: boolean = false;
+
+  constructor() {
+    super("ws");
+  }
+
+  public async initialize(): Promise<void> {
+    if (!this.isInitialized) {
+      await this.connect();
+      this.isInitialized = true;
+    }
+  }
+
   joinTournament(tournamentId: number): void {
     this.emit("tournament:join", { tournamentId });
   }
@@ -25,4 +39,43 @@ export class TournamentSocketService extends SocketService {
   sendChatMessage(tournamentId: number, message: string): void {
     this.emit("tournament:chat", { tournamentId, message });
   }
+
+  sendPaddleMove(
+    tournamentId: number,
+    matchId: number,
+    position: number
+  ): void {
+    this.emit("match:move", {
+      tournamentId,
+      matchId,
+      position,
+    });
+  }
+
+  sendPlayerReady(tournamentId: number, matchId: number): void {
+    this.emit("match:ready", {
+      tournamentId,
+      matchId,
+    });
+  }
+
+  onGameUpdate(callback: (state: GameState) => void): void {
+    this.on("match:update", callback);
+  }
+
+  onScore(
+    callback: (data: { player1Score: number; player2Score: number }) => void
+  ): void {
+    this.on("match:score", callback);
+  }
+
+  onMatchStart(callback: () => void): void {
+    this.on("match:start", callback);
+  }
+
+  onMatchEnd(callback: (data: { winnerId: number }) => void): void {
+    this.on("match:end", callback);
+  }
 }
+
+export const tournamentSocket = new TournamentSocketService();

@@ -34,7 +34,8 @@ class TournamentPage extends ParamsBaseComponent {
       await this.setupWebSocket();
       this.render();
       this.setupMobileToggles();
-      this.setupEventListeners();
+
+      this.addEventListener("click", this.handleClick);
     } catch (error) {
       console.error("Failed to initialize tournament page:", error);
       router.navigateTo("/login");
@@ -50,8 +51,17 @@ class TournamentPage extends ParamsBaseComponent {
     toggleChat?.removeEventListener("click", () => {});
     toggleParticipants?.removeEventListener("click", () => {});
 
+    this.removeEventListener("click", this.handleClick);
+
     this.cleanupWebSocket();
   }
+
+  private handleClick = (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.id === "startTournamentBtn") {
+      this.handleStartTournament();
+    }
+  };
 
   private async loadUserProfile() {
     const userProfile = await userService.getUserProfile();
@@ -141,6 +151,7 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:start", (data) => {
+      console.log("tournament:start", data);
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -202,28 +213,16 @@ class TournamentPage extends ParamsBaseComponent {
       const tournamentId = Number(this.params.id);
       await tournamentService.startTournament(tournamentId);
 
-      // Update local tournament state
       if (this.tournament) {
         this.tournament.status = "IN_PROGRESS";
       }
 
-      // Emit socket event
       tournamentSocket.startTournament(tournamentId);
 
-      // Force re-render to update UI
       this.render();
     } catch (error) {
       console.error("Failed to start tournament:", error);
     }
-  }
-
-  private setupEventListeners(): void {
-    const startTournamentBtn = this.querySelector("#startTournamentBtn");
-
-    startTournamentBtn?.addEventListener(
-      "click",
-      this.handleStartTournament.bind(this)
-    );
   }
 
   private setupMobileToggles() {

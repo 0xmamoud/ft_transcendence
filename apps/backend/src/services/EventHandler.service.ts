@@ -281,14 +281,43 @@ export class EventHandlerService {
     const gameLoop = setInterval(() => {
       const gameState = this.gameService.getGameState(matchId);
       if (gameState) {
+        // Sauvegarder les scores actuels
+        const currentScoreLeft = gameState.scores.left;
+        const currentScoreRight = gameState.scores.right;
+
+        // Mettre à jour la position de la balle et vérifier les collisions
         this.gameService.updateBall(matchId);
+
+        // Récupérer l'état mis à jour
+        const updatedGameState = this.gameService.getGameState(matchId);
+        if (!updatedGameState) return;
+
+        // Vérifier si les scores ont changé
+        if (
+          updatedGameState.scores.left !== currentScoreLeft ||
+          updatedGameState.scores.right !== currentScoreRight
+        ) {
+          // Envoyer une mise à jour de score aux clients
+          this.socketService.broadcastToRoom(tournamentId, "match:score", {
+            matchId,
+            player1Score: updatedGameState.scores.left,
+            player2Score: updatedGameState.scores.right,
+          });
+
+          // Ne pas mettre à jour la base de données à chaque changement de score
+          // On le fera uniquement à la fin du match
+        }
 
         this.socketService.broadcastToRoom(tournamentId, "match:update", {
           matchId,
-          state: this.gameService.getGameState(matchId),
+          state: updatedGameState,
         });
 
-        if (gameState.scores.left >= 11 || gameState.scores.right >= 11) {
+        // Changer le score gagnant à 5 au lieu de 11
+        if (
+          updatedGameState.scores.left >= 5 ||
+          updatedGameState.scores.right >= 5
+        ) {
           this.endMatch(tournamentId, matchId);
         }
       }
@@ -308,7 +337,21 @@ export class EventHandlerService {
     if (!player1Id || !player2Id) return;
 
     // Déterminer le gagnant en fonction des scores
-    const winnerId = gameState.scores.left >= 11 ? player1Id : player2Id;
+    const winnerId = gameState.scores.left >= 5 ? player1Id : player2Id;
+
+    // Mettre à jour les scores dans la base de données à la fin du match
+    try {
+      await this.tournamentService.updateMatchScores(
+        matchId,
+        gameState.scores.left,
+        gameState.scores.right
+      );
+    } catch (error) {
+      console.error(
+        `Failed to update match scores for match ${matchId}:`,
+        error
+      );
+    }
 
     // Arrêter la boucle de jeu
     if (this.gameLoops.has(matchId)) {
@@ -329,6 +372,8 @@ export class EventHandlerService {
     this.socketService.broadcastToRoom(tournamentId, "match:end", {
       matchId,
       winnerId,
+      player1Score: gameState.scores.left,
+      player2Score: gameState.scores.right,
     });
 
     // Si un nouveau match est disponible, notifier les clients

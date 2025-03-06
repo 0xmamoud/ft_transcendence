@@ -346,6 +346,25 @@ export class TournamentService {
     return null;
   }
 
+  async updateMatchScores(
+    matchId: number,
+    player1Score: number,
+    player2Score: number
+  ) {
+    try {
+      return await this.app.db.match.update({
+        where: { id: matchId },
+        data: {
+          player1Score,
+          player2Score,
+        },
+      });
+    } catch (error) {
+      console.error(`Error updating match scores for match ${matchId}:`, error);
+      throw error;
+    }
+  }
+
   async getMatch(matchId: number) {
     return await this.app.db.match.findUnique({
       where: { id: matchId },

@@ -13,10 +13,9 @@ interface Match {
   status: "pending" | "in_progress" | "completed";
 }
 
-interface MatchesProps {
-  matches: Match[];
-  tournamentStatus: "pending" | "in_progress" | "completed";
-}
+// interface MatchesProps {
+//   matches: Match[];
+// }
 
 export class TournamentMatches extends PropsBaseComponent {
   connectedCallback() {
@@ -28,11 +27,7 @@ export class TournamentMatches extends PropsBaseComponent {
   }
 
   render() {
-    // Conversion explicite pour éviter l'erreur de type
-    const props = JSON.parse(
-      JSON.stringify(this.props)
-    ) as unknown as MatchesProps;
-    const { matches = [], tournamentStatus } = props;
+    const { matches = [] } = this.props;
 
     this.innerHTML = /* html */ `
       <div class="h-full flex flex-col">
@@ -51,7 +46,7 @@ export class TournamentMatches extends PropsBaseComponent {
             matches.length > 0
               ? matches
                   .map(
-                    (match) => /* html */ `
+                    (match: Match) => /* html */ `
               <div class="match-item border border-secondary rounded-lg p-2">
                 <div class="text-xs text-gray-500 mb-1">Match #${match.id}</div>
                 <div class="flex flex-col gap-1">

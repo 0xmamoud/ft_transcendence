@@ -20,16 +20,6 @@ export abstract class SocketService {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // if (this.socket) {
-        //   if (this.socket.readyState === WebSocket.CONNECTING) {
-        //     this.socket.onopen = null;
-        //     this.socket.onclose = null;
-        //     this.socket.onerror = null;
-        //     this.socket.onmessage = null;
-        //   }
-        //   this.disconnect();
-        // }
-
         const wsUrl = `${
           window.location.protocol === "https:" ? "wss:" : "ws:"
         }//${window.location.host}/${this.path}`;

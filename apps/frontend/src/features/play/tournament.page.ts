@@ -351,20 +351,22 @@ class TournamentPage extends ParamsBaseComponent {
                     status: currentMatch?.status || "PENDING",
                     player1: currentMatch?.player1
                       ? {
-                          id: currentMatch.player1.id,
+                          id: Number(currentMatch.player1Id),
                           username: currentMatch.player1.username,
                           score: currentMatch.player1Score || 0,
                         }
                       : undefined,
                     player2: currentMatch?.player2
                       ? {
-                          id: currentMatch.player2.id,
+                          id: Number(currentMatch.player2Id),
                           username: currentMatch.player2.username,
                           score: currentMatch.player2Score || 0,
                         }
                       : undefined,
-                    currentUserId: this.currentUser,
-                    matchId: currentMatch?.id,
+                    currentUserId: Number(this.currentUser),
+                    matchId: currentMatch?.id
+                      ? Number(currentMatch.id)
+                      : undefined,
                     tournamentId: Number(this.params.id),
                   }).replace(/'/g, "&apos;")}'
                 ></tournament-game>

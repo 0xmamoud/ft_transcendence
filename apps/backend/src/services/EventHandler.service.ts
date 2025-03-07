@@ -78,13 +78,11 @@ export class EventHandlerService {
     this.socketService.joinRoom(socket, data.tournamentId);
 
     try {
-      // Récupérer la liste des participants à jour
       const participants =
         await this.tournamentService.getTournamentParticipants(
           data.tournamentId
         );
 
-      // Notifier les clients
       this.socketService.broadcastToRoom(data.tournamentId, "tournament:join", {
         userId: client.userId,
         tournamentId: data.tournamentId,
@@ -168,29 +166,19 @@ export class EventHandlerService {
     }
 
     try {
-      // Démarrer le tournoi
       await this.tournamentService.startTournament(
         data.tournamentId,
         client.userId
       );
 
-      // Créer les matchs
       await this.matchService.createMatches(data.tournamentId);
 
-      // Démarrer le premier match
-      if (
-        (await this.matchService.areAllMatchesCompleted(data.tournamentId)) ===
-        false
-      ) {
-        await this.matchService.startNextMatch(data.tournamentId);
-      }
+      await this.matchService.startNextMatch(data.tournamentId);
 
-      // Récupérer les matchs à jour depuis la base de données
       const freshMatches = await this.matchService.getTournamentMatches(
         data.tournamentId
       );
 
-      // Notifier les clients
       this.socketService.broadcastToRoom(
         data.tournamentId,
         "tournament:start",
@@ -257,11 +245,9 @@ export class EventHandlerService {
       return;
     }
 
-    // Récupérer les informations du match
     const match = await this.matchService.getMatch(data.matchId);
     if (!match) return;
 
-    // Créer le jeu s'il n'existe pas déjà
     if (!this.gameService.getGameState(data.matchId)) {
       this.gameService.createGame(
         data.matchId,
@@ -272,7 +258,6 @@ export class EventHandlerService {
       );
     }
 
-    // Marquer le joueur comme prêt
     const gameState = this.gameService.getGameState(data.matchId);
     if (!gameState) return;
 
@@ -284,7 +269,6 @@ export class EventHandlerService {
       console.log("Player 2 ready:", client.userId);
     }
 
-    // Vérifier si les deux joueurs sont prêts
     if (gameState.players.player1Ready && gameState.players.player2Ready) {
       console.log("Both players ready, broadcasting match:start event", {
         tournamentId: data.tournamentId,
@@ -294,10 +278,8 @@ export class EventHandlerService {
         player2Ready: gameState.players.player2Ready,
       });
 
-      // Démarrer la boucle de jeu
       this.startGameLoop(data.tournamentId, data.matchId);
 
-      // Notifier les clients que le match commence
       this.socketService.broadcastToRoom(data.tournamentId, "match:start", {
         matchId: data.matchId,
         userId: client.userId,
@@ -392,28 +374,23 @@ export class EventHandlerService {
     const gameState = this.gameService.getGameState(matchId);
     if (!gameState) return;
 
-    // Récupérer les IDs des joueurs
     const player1Id = this.gameService.getPlayer1Id(matchId);
     const player2Id = this.gameService.getPlayer2Id(matchId);
 
     if (!player1Id || !player2Id) return;
 
-    // Déterminer le gagnant en fonction des scores
     const winnerId = gameState.scores.left >= 5 ? player1Id : player2Id;
     const player1Score = gameState.scores.left;
     const player2Score = gameState.scores.right;
 
-    // Arrêter la boucle de jeu
     if (this.gameLoops.has(matchId)) {
       clearInterval(this.gameLoops.get(matchId));
       this.gameLoops.delete(matchId);
     }
 
-    // Supprimer l'état du jeu
     this.gameService.removeGame(matchId);
 
     try {
-      // Terminer le match
       const result = await this.matchService.finishMatch(
         matchId,
         winnerId,
@@ -421,12 +398,10 @@ export class EventHandlerService {
         player2Score
       );
 
-      // Récupérer les matchs à jour
       const freshMatches = await this.matchService.getTournamentMatches(
         tournamentId
       );
 
-      // Notifier les clients de la fin du match
       this.socketService.broadcastToRoom(tournamentId, "match:end", {
         matchId,
         winnerId,
@@ -435,27 +410,22 @@ export class EventHandlerService {
         matches: freshMatches,
       });
 
-      // Démarrer le prochain match
       const nextMatch = await this.matchService.startNextMatch(
         result.tournamentId
       );
 
-      // Si aucun prochain match n'est disponible, vérifier si le tournoi est terminé
       if (nextMatch === null) {
         const allCompleted = await this.matchService.areAllMatchesCompleted(
           result.tournamentId
         );
 
         if (allCompleted) {
-          // Terminer le tournoi
           await this.tournamentService.finishTournament(result.tournamentId);
 
-          // Récupérer les matchs finaux
           const finalMatches = await this.matchService.getTournamentMatches(
             tournamentId
           );
 
-          // Notifier les clients que le tournoi est terminé
           this.socketService.broadcastToRoom(
             tournamentId,
             "tournament:finish",

@@ -7,9 +7,6 @@ export class TournamentService {
     private readonly matchService: MatchService
   ) {}
 
-  /**
-   * Crée un nouveau tournoi
-   */
   async createTournament(
     tournamentName: string,
     creatorId: number,
@@ -35,9 +32,6 @@ export class TournamentService {
     return tournament;
   }
 
-  /**
-   * Permet à un utilisateur de rejoindre un tournoi
-   */
   async joinTournament(tournamentId: number, userId: number, username: string) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -92,9 +86,6 @@ export class TournamentService {
     });
   }
 
-  /**
-   * Démarre un tournoi
-   */
   async startTournament(tournamentId: number, userId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -118,7 +109,6 @@ export class TournamentService {
       throw new Error("Not enough participants to start the tournament");
     }
 
-    // Mettre à jour le statut du tournoi
     await this.app.db.tournament.update({
       where: { id: tournamentId },
       data: { status: "IN_PROGRESS" },
@@ -127,9 +117,6 @@ export class TournamentService {
     return tournament;
   }
 
-  /**
-   * Termine un tournoi
-   */
   async finishTournament(tournamentId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -149,9 +136,6 @@ export class TournamentService {
     });
   }
 
-  /**
-   * Récupère tous les tournois
-   */
   async getTournaments() {
     return await this.app.db.tournament.findMany({
       include: {
@@ -185,9 +169,6 @@ export class TournamentService {
     });
   }
 
-  /**
-   * Récupère un tournoi par son ID
-   */
   async getTournament(tournamentId: number) {
     return await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -222,9 +203,6 @@ export class TournamentService {
     });
   }
 
-  /**
-   * Récupère les participants d'un tournoi
-   */
   async getTournamentParticipants(tournamentId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },

@@ -3,11 +3,7 @@ import { FastifyInstance } from "fastify";
 export class MatchService {
   constructor(private readonly app: FastifyInstance) {}
 
-  /**
-   * Crée les matchs pour un tournoi
-   */
   async createMatches(tournamentId: number) {
-    // Récupérer les participants du tournoi
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
       include: { participants: true },
@@ -20,7 +16,6 @@ export class MatchService {
     const participants = tournament.participants;
     const matches = [];
 
-    // Créer un match pour chaque paire de participants
     for (let i = 0; i < participants.length; i++) {
       for (let j = i + 1; j < participants.length; j++) {
         const match = await this.app.db.match.create({
@@ -38,9 +33,6 @@ export class MatchService {
     return matches;
   }
 
-  /**
-   * Démarre le prochain match d'un tournoi
-   */
   async startNextMatch(tournamentId: number) {
     const nextMatch = await this.app.db.match.findFirst({
       where: {
@@ -62,9 +54,6 @@ export class MatchService {
     });
   }
 
-  /**
-   * Récupère les matchs d'un tournoi
-   */
   async getTournamentMatches(tournamentId: number) {
     return await this.app.db.match.findMany({
       where: { tournamentId },
@@ -85,9 +74,6 @@ export class MatchService {
     });
   }
 
-  /**
-   * Récupère un match par son ID
-   */
   async getMatch(matchId: number) {
     return await this.app.db.match.findUnique({
       where: { id: matchId },
@@ -108,38 +94,12 @@ export class MatchService {
     });
   }
 
-  /**
-   * Met à jour les scores d'un match
-   */
-  async updateMatchScores(
-    matchId: number,
-    player1Score: number,
-    player2Score: number
-  ) {
-    try {
-      return await this.app.db.match.update({
-        where: { id: matchId },
-        data: {
-          player1Score,
-          player2Score,
-        },
-      });
-    } catch (error) {
-      console.error(`Error updating match scores for match ${matchId}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Termine un match
-   */
   async finishMatch(
     matchId: number,
     winnerId: number,
     player1Score?: number,
     player2Score?: number
   ) {
-    // Mettre à jour le match actuel
     const currentMatch = await this.app.db.match.update({
       where: { id: matchId },
       data: {
@@ -156,9 +116,6 @@ export class MatchService {
     };
   }
 
-  /**
-   * Vérifie si tous les matchs d'un tournoi sont terminés
-   */
   async areAllMatchesCompleted(tournamentId: number) {
     const matches = await this.app.db.match.findMany({
       where: { tournamentId },

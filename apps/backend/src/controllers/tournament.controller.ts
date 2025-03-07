@@ -40,10 +40,12 @@ export class TournamentController {
     try {
       const { name } = request.body;
       const { maxParticipants } = request.query;
+      const username = request.user.username ?? `User_${request.user.userId}`;
+
       const tournament = await this.tournamentService.createTournament(
         name,
         request.user.userId,
-        undefined,
+        username,
         maxParticipants
       );
       return reply.status(200).send(tournament);
@@ -61,7 +63,11 @@ export class TournamentController {
   ) {
     try {
       const { id } = request.params;
-      const { username } = request.body;
+      const username =
+        request.body.username ??
+        request.user.username ??
+        `User_${request.user.userId}`;
+
       const tournament = await this.tournamentService.joinTournament(
         Number(id),
         request.user.userId,
@@ -98,21 +104,6 @@ export class TournamentController {
       const participants =
         await this.tournamentService.getTournamentParticipants(Number(id));
       return reply.status(200).send(participants);
-    } catch (error) {
-      return reply.status(500).send({ message: (error as Error).message });
-    }
-  }
-
-  async getTournamentMatches(
-    request: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply
-  ) {
-    try {
-      const { id } = request.params;
-      const matches = await this.tournamentService.getTournamentMatches(
-        Number(id)
-      );
-      return reply.status(200).send(matches);
     } catch (error) {
       return reply.status(500).send({ message: (error as Error).message });
     }

@@ -1,21 +1,21 @@
 import { FastifyInstance } from "fastify";
+import { MatchService } from "#services/match.service";
 
 export class TournamentService {
-  constructor(private readonly app: FastifyInstance) {}
+  constructor(
+    private readonly app: FastifyInstance,
+    private readonly matchService: MatchService
+  ) {}
 
+  /**
+   * Crée un nouveau tournoi
+   */
   async createTournament(
     tournamentName: string,
     creatorId: number,
-    username?: string,
+    username: string,
     maxParticipants?: number
   ) {
-    if (!username) {
-      const user = await this.app.db.user.findUnique({
-        where: { id: creatorId },
-      });
-      username = user?.username;
-    }
-
     const tournament = await this.app.db.tournament.create({
       data: {
         name: tournamentName,
@@ -35,11 +35,10 @@ export class TournamentService {
     return tournament;
   }
 
-  async joinTournament(
-    tournamentId: number,
-    userId: number,
-    username?: string
-  ) {
+  /**
+   * Permet à un utilisateur de rejoindre un tournoi
+   */
+  async joinTournament(tournamentId: number, userId: number, username: string) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
       include: { participants: true },
@@ -58,16 +57,6 @@ export class TournamentService {
       tournament.participants.length >= tournament.maxParticipants
     ) {
       throw new Error("Tournament is full");
-    }
-
-    if (!username) {
-      const user = await this.app.db.user.findUnique({
-        where: { id: userId },
-      });
-      if (!user) {
-        throw new Error("User not found");
-      }
-      username = user.username;
     }
 
     const existingUsername = await this.app.db.participant.findFirst({
@@ -103,6 +92,9 @@ export class TournamentService {
     });
   }
 
+  /**
+   * Démarre un tournoi
+   */
   async startTournament(tournamentId: number, userId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -126,39 +118,18 @@ export class TournamentService {
       throw new Error("Not enough participants to start the tournament");
     }
 
+    // Mettre à jour le statut du tournoi
     await this.app.db.tournament.update({
       where: { id: tournamentId },
       data: { status: "IN_PROGRESS" },
     });
 
-    const participants = tournament.participants;
-    const matches = [];
-
-    for (let i = 0; i < participants.length; i++) {
-      for (let j = i + 1; j < participants.length; j++) {
-        const match = await this.app.db.match.create({
-          data: {
-            tournamentId: tournamentId,
-            player1Id: participants[i].userId,
-            player2Id: participants[j].userId,
-            status: "PENDING",
-          },
-        });
-        matches.push(match);
-      }
-    }
-
-    if (matches.length > 0) {
-      const firstMatch = await this.app.db.match.update({
-        where: { id: matches[0].id },
-        data: { status: "IN_PROGRESS" },
-      });
-      matches[0] = firstMatch;
-    }
-
-    return matches;
+    return tournament;
   }
 
+  /**
+   * Termine un tournoi
+   */
   async finishTournament(tournamentId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -178,6 +149,9 @@ export class TournamentService {
     });
   }
 
+  /**
+   * Récupère tous les tournois
+   */
   async getTournaments() {
     return await this.app.db.tournament.findMany({
       include: {
@@ -211,6 +185,9 @@ export class TournamentService {
     });
   }
 
+  /**
+   * Récupère un tournoi par son ID
+   */
   async getTournament(tournamentId: number) {
     return await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -245,6 +222,9 @@ export class TournamentService {
     });
   }
 
+  /**
+   * Récupère les participants d'un tournoi
+   */
   async getTournamentParticipants(tournamentId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
@@ -267,121 +247,5 @@ export class TournamentService {
     }
 
     return tournament.participants;
-  }
-
-  async getTournamentMatches(tournamentId: number) {
-    const tournament = await this.app.db.tournament.findUnique({
-      where: { id: tournamentId },
-      include: {
-        matches: {
-          include: {
-            player1: {
-              select: {
-                id: true,
-                username: true,
-              },
-            },
-            player2: {
-              select: {
-                id: true,
-                username: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!tournament) {
-      throw new Error("Tournament not found");
-    }
-
-    return tournament.matches;
-  }
-
-  async finishMatch(matchId: number, winnerId: number) {
-    // 1. Mettre à jour le match actuel
-    const currentMatch = await this.app.db.match.update({
-      where: { id: matchId },
-      data: {
-        status: "COMPLETED",
-        winnerId: winnerId,
-      },
-    });
-
-    // 2. Trouver le prochain match en attente dans le même tournoi
-    const nextMatch = await this.app.db.match.findFirst({
-      where: {
-        tournamentId: currentMatch.tournamentId,
-        status: "PENDING",
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
-
-    // 3. Si on trouve un match en attente, le mettre en IN_PROGRESS
-    if (nextMatch) {
-      await this.app.db.match.update({
-        where: { id: nextMatch.id },
-        data: { status: "IN_PROGRESS" },
-      });
-      return nextMatch;
-    }
-
-    // 4. Si pas de match suivant, terminer le tournoi
-    const allMatches = await this.app.db.match.findMany({
-      where: {
-        tournamentId: currentMatch.tournamentId,
-      },
-    });
-
-    const allCompleted = allMatches.every(
-      (match) => match.status === "COMPLETED"
-    );
-    if (allCompleted) {
-      await this.finishTournament(currentMatch.tournamentId);
-    }
-
-    return null;
-  }
-
-  async updateMatchScores(
-    matchId: number,
-    player1Score: number,
-    player2Score: number
-  ) {
-    try {
-      return await this.app.db.match.update({
-        where: { id: matchId },
-        data: {
-          player1Score,
-          player2Score,
-        },
-      });
-    } catch (error) {
-      console.error(`Error updating match scores for match ${matchId}:`, error);
-      throw error;
-    }
-  }
-
-  async getMatch(matchId: number) {
-    return await this.app.db.match.findUnique({
-      where: { id: matchId },
-      include: {
-        player1: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-        player2: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
-    });
   }
 }

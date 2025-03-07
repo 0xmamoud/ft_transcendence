@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 import { SocketService } from "#services/socket.service.js";
 import { GameService } from "#services/game.service.js";
 import { TournamentService } from "#services/tournament.service.js";
+import { MatchService } from "#services/match.service.js";
 
 interface TournamentEvents {
   join: { tournamentId: number };
@@ -23,7 +24,8 @@ export class EventHandlerService {
   constructor(
     private readonly socketService: SocketService,
     private readonly gameService: GameService,
-    private readonly tournamentService: TournamentService
+    private readonly tournamentService: TournamentService,
+    private readonly matchService: MatchService
   ) {
     this.eventHandlers = new Map();
     this.gameLoops = new Map();
@@ -66,20 +68,40 @@ export class EventHandlerService {
     return this.eventHandlers.get(event);
   }
 
-  private handleTournamentJoin(
+  private async handleTournamentJoin(
     socket: WebSocket,
     data: TournamentEvents["join"]
-  ): void {
+  ): Promise<void> {
     const client = this.socketService.getClient(socket);
     if (!client) return;
 
     this.socketService.joinRoom(socket, data.tournamentId);
 
-    this.socketService.broadcastToRoom(data.tournamentId, "tournament:join", {
-      userId: client.userId,
-      tournamentId: data.tournamentId,
-      message: `User ${client.userId} has joined the tournament`,
-    });
+    try {
+      // Récupérer la liste des participants à jour
+      const participants =
+        await this.tournamentService.getTournamentParticipants(
+          data.tournamentId
+        );
+
+      // Notifier les clients
+      this.socketService.broadcastToRoom(data.tournamentId, "tournament:join", {
+        userId: client.userId,
+        tournamentId: data.tournamentId,
+        message: `User ${client.userId} has joined the tournament`,
+        participants: participants,
+      });
+    } catch (error: any) {
+      console.error("Failed to handle tournament join:", error);
+      socket.send(
+        JSON.stringify({
+          event: "error",
+          data: {
+            message: error.message || "Failed to join tournament",
+          },
+        })
+      );
+    }
   }
 
   private handleTournamentLeave(
@@ -128,10 +150,10 @@ export class EventHandlerService {
     });
   }
 
-  private handleTournamentStart(
+  private async handleTournamentStart(
     socket: WebSocket,
     data: TournamentEvents["start"]
-  ): void {
+  ): Promise<void> {
     const client = this.socketService.getClient(socket);
     if (!client) return;
 
@@ -145,12 +167,52 @@ export class EventHandlerService {
       return;
     }
 
-    this.socketService.broadcastToRoom(data.tournamentId, "tournament:start", {
-      userId: client.userId,
-      tournamentId: data.tournamentId,
-      message: `Tournament ${data.tournamentId} has started`,
-      timestamp: new Date().toISOString(),
-    });
+    try {
+      // Démarrer le tournoi
+      await this.tournamentService.startTournament(
+        data.tournamentId,
+        client.userId
+      );
+
+      // Créer les matchs
+      await this.matchService.createMatches(data.tournamentId);
+
+      // Démarrer le premier match
+      if (
+        (await this.matchService.areAllMatchesCompleted(data.tournamentId)) ===
+        false
+      ) {
+        await this.matchService.startNextMatch(data.tournamentId);
+      }
+
+      // Récupérer les matchs à jour depuis la base de données
+      const freshMatches = await this.matchService.getTournamentMatches(
+        data.tournamentId
+      );
+
+      // Notifier les clients
+      this.socketService.broadcastToRoom(
+        data.tournamentId,
+        "tournament:start",
+        {
+          userId: client.userId,
+          tournamentId: data.tournamentId,
+          message: `Tournament ${data.tournamentId} has started`,
+          timestamp: new Date().toISOString(),
+          matches: freshMatches,
+        }
+      );
+    } catch (error: any) {
+      console.error("Failed to start tournament:", error);
+      socket.send(
+        JSON.stringify({
+          event: "error",
+          data: {
+            message: error.message || "Failed to start tournament",
+          },
+        })
+      );
+    }
   }
 
   private handleTournamentFinish(
@@ -196,7 +258,7 @@ export class EventHandlerService {
     }
 
     // Récupérer les informations du match
-    const match = await this.tournamentService.getMatch(data.matchId);
+    const match = await this.matchService.getMatch(data.matchId);
     if (!match) return;
 
     // Créer le jeu s'il n'existe pas déjà
@@ -338,20 +400,8 @@ export class EventHandlerService {
 
     // Déterminer le gagnant en fonction des scores
     const winnerId = gameState.scores.left >= 5 ? player1Id : player2Id;
-
-    // Mettre à jour les scores dans la base de données à la fin du match
-    try {
-      await this.tournamentService.updateMatchScores(
-        matchId,
-        gameState.scores.left,
-        gameState.scores.right
-      );
-    } catch (error) {
-      console.error(
-        `Failed to update match scores for match ${matchId}:`,
-        error
-      );
-    }
+    const player1Score = gameState.scores.left;
+    const player2Score = gameState.scores.right;
 
     // Arrêter la boucle de jeu
     if (this.gameLoops.has(matchId)) {
@@ -362,26 +412,67 @@ export class EventHandlerService {
     // Supprimer l'état du jeu
     this.gameService.removeGame(matchId);
 
-    // Mettre à jour le match et passer au suivant
-    const nextMatch = await this.tournamentService.finishMatch(
-      matchId,
-      winnerId
-    );
+    try {
+      // Terminer le match
+      const result = await this.matchService.finishMatch(
+        matchId,
+        winnerId,
+        player1Score,
+        player2Score
+      );
 
-    // Notifier les clients de la fin du match
-    this.socketService.broadcastToRoom(tournamentId, "match:end", {
-      matchId,
-      winnerId,
-      player1Score: gameState.scores.left,
-      player2Score: gameState.scores.right,
-    });
+      // Récupérer les matchs à jour
+      const freshMatches = await this.matchService.getTournamentMatches(
+        tournamentId
+      );
 
-    // Si un nouveau match est disponible, notifier les clients
-    if (nextMatch) {
-      this.socketService.broadcastToRoom(tournamentId, "tournament:update", {
-        message: "Next match is starting",
-        nextMatchId: nextMatch.id,
+      // Notifier les clients de la fin du match
+      this.socketService.broadcastToRoom(tournamentId, "match:end", {
+        matchId,
+        winnerId,
+        player1Score,
+        player2Score,
+        matches: freshMatches,
       });
+
+      // Démarrer le prochain match
+      const nextMatch = await this.matchService.startNextMatch(
+        result.tournamentId
+      );
+
+      // Si aucun prochain match n'est disponible, vérifier si le tournoi est terminé
+      if (nextMatch === null) {
+        const allCompleted = await this.matchService.areAllMatchesCompleted(
+          result.tournamentId
+        );
+
+        if (allCompleted) {
+          // Terminer le tournoi
+          await this.tournamentService.finishTournament(result.tournamentId);
+
+          // Récupérer les matchs finaux
+          const finalMatches = await this.matchService.getTournamentMatches(
+            tournamentId
+          );
+
+          // Notifier les clients que le tournoi est terminé
+          this.socketService.broadcastToRoom(
+            tournamentId,
+            "tournament:finish",
+            {
+              tournamentId,
+              message: "Tournament has been completed",
+              matches: finalMatches,
+            }
+          );
+
+          console.log("Tournament completed:", tournamentId);
+        }
+      } else {
+        console.log("Next match started:", nextMatch.id);
+      }
+    } catch (error) {
+      console.error("Error ending match:", error);
     }
   }
 }

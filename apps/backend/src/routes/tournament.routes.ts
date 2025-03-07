@@ -1,9 +1,11 @@
 import { FastifyInstance } from "fastify";
 import { TournamentController } from "#controllers/tournament.controller";
 import { TournamentService } from "#services/tournament.service";
+import { MatchService } from "#services/match.service";
 
 async function tournamentRoutes(app: FastifyInstance) {
-  const tournamentService = new TournamentService(app);
+  const matchService = new MatchService(app);
+  const tournamentService = new TournamentService(app, matchService);
   const tournamentController = new TournamentController(tournamentService);
 
   app.addHook("onRequest", app.authenticate);
@@ -54,11 +56,6 @@ async function tournamentRoutes(app: FastifyInstance) {
   app.get(
     "/:id/participants",
     tournamentController.getTournamentParticipants.bind(tournamentController)
-  );
-
-  app.get(
-    "/:id/matches",
-    tournamentController.getTournamentMatches.bind(tournamentController)
   );
 }
 

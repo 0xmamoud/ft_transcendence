@@ -263,24 +263,31 @@ export class EventHandlerService {
       );
     }
 
-    const gameState = this.gameService.getGameState(data.matchId);
-    if (!gameState) return;
+    // Utiliser le nouveau système de ready state
+    const bothPlayersReady = this.matchService.setPlayerReady(
+      data.matchId,
+      client.userId,
+      match.player1Id,
+      match.player2Id
+    );
 
-    if (client.userId === gameState.players.player1Id) {
-      gameState.players.player1Ready = true;
-      console.log("Player 1 ready:", client.userId);
-    } else if (client.userId === gameState.players.player2Id) {
-      gameState.players.player2Ready = true;
-      console.log("Player 2 ready:", client.userId);
-    }
+    // Récupérer l'état actuel des ready
+    const readyState = this.matchService.getReadyState(data.matchId);
+    if (!readyState) return;
 
-    if (gameState.players.player1Ready && gameState.players.player2Ready) {
-      console.log("Both players ready, broadcasting match:start event", {
+    // Envoyer une mise à jour du ready state à tous les clients
+    this.socketService.broadcastToRoom(data.tournamentId, "match:ready", {
+      matchId: data.matchId,
+      player1Ready: readyState.player1Ready,
+      player2Ready: readyState.player2Ready,
+    });
+
+    // Si les deux joueurs sont prêts, démarrer le jeu
+    if (bothPlayersReady) {
+      console.log("Both players ready, starting game", {
         tournamentId: data.tournamentId,
         matchId: data.matchId,
         userId: client.userId,
-        player1Ready: gameState.players.player1Ready,
-        player2Ready: gameState.players.player2Ready,
       });
 
       this.startGameLoop(data.tournamentId, data.matchId);
@@ -290,10 +297,7 @@ export class EventHandlerService {
         userId: client.userId,
       });
     } else {
-      console.log("Waiting for both players to be ready:", {
-        player1Ready: gameState.players.player1Ready,
-        player2Ready: gameState.players.player2Ready,
-      });
+      console.log("Waiting for both players to be ready:", readyState);
     }
   }
 
@@ -469,6 +473,9 @@ export class EventHandlerService {
       clearInterval(this.gameLoops.get(matchId));
       this.gameLoops.delete(matchId);
     }
+
+    // Nettoyer le ready state
+    this.matchService.resetReadyState(matchId);
 
     this.gameService.removeGame(matchId);
 

@@ -1,7 +1,16 @@
 import { FastifyInstance } from "fastify";
 
+interface ReadyState {
+  player1Ready: boolean;
+  player2Ready: boolean;
+}
+
 export class MatchService {
-  constructor(private readonly app: FastifyInstance) {}
+  private readyStates: Map<number, ReadyState>;
+
+  constructor(private readonly app: FastifyInstance) {
+    this.readyStates = new Map();
+  }
 
   async createMatches(tournamentId: number) {
     const tournament = await this.app.db.tournament.findUnique({
@@ -125,5 +134,41 @@ export class MatchService {
       matches.length > 0 &&
       matches.every((match) => match.status === "COMPLETED")
     );
+  }
+
+  initializeReadyState(matchId: number): void {
+    this.readyStates.set(matchId, {
+      player1Ready: false,
+      player2Ready: false,
+    });
+  }
+
+  setPlayerReady(
+    matchId: number,
+    playerId: number,
+    player1Id: number,
+    player2Id: number
+  ): boolean {
+    const readyState = this.readyStates.get(matchId);
+    if (!readyState) {
+      this.initializeReadyState(matchId);
+      return this.setPlayerReady(matchId, playerId, player1Id, player2Id);
+    }
+
+    if (playerId === player1Id) {
+      readyState.player1Ready = true;
+    } else if (playerId === player2Id) {
+      readyState.player2Ready = true;
+    }
+
+    return readyState.player1Ready && readyState.player2Ready;
+  }
+
+  getReadyState(matchId: number): ReadyState | undefined {
+    return this.readyStates.get(matchId);
+  }
+
+  resetReadyState(matchId: number): void {
+    this.readyStates.delete(matchId);
   }
 }

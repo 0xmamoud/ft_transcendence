@@ -1,6 +1,6 @@
 import { PropsBaseComponent } from "@/core/components";
 import { tournamentSocket } from "@/features/play/tournament.socket.service";
-import { GameState } from "@/features/play/game.service";
+import { GameState as ServerGameState } from "@/features/play/game.service";
 
 interface Player {
   id: number;
@@ -17,22 +17,72 @@ interface GameProps {
   tournamentId?: number;
 }
 
+interface PlayerState {
+  isPlayer1: boolean;
+  isPlayer2: boolean;
+  isReady: boolean;
+}
+
+interface GameStateData {
+  ball: {
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+  };
+  paddles: {
+    left: { y: number; height: number };
+    right: { y: number; height: number };
+  };
+  canvas: {
+    width: number;
+    height: number;
+  };
+  scores: {
+    left: number;
+    right: number;
+  };
+  players: {
+    player1Id: number;
+    player2Id: number;
+    player1Ready?: boolean;
+    player2Ready?: boolean;
+  };
+}
+
+interface MatchState {
+  isStarted: boolean;
+  isEnded: boolean;
+  winnerId: number | null;
+}
+
 export class TournamentGame extends PropsBaseComponent {
-  private isPlayer1: boolean = false;
-  private isPlayer2: boolean = false;
-  private isReady: boolean = false;
-  private gameStarted: boolean = false;
-  private player1Score: number = 0;
-  private player2Score: number = 0;
-  private matchEnded: boolean = false;
-  private winnerId: number | null = null;
+  // État du joueur
+  private playerState: PlayerState = {
+    isPlayer1: false,
+    isPlayer2: false,
+    isReady: false,
+  };
+
+  // État du match
+  private matchState: MatchState = {
+    isStarted: false,
+    isEnded: false,
+    winnerId: null,
+  };
+
+  // État du jeu (reçu du serveur)
+  private gameState: GameStateData | null = null;
+
+  // Ressources canvas
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
-  private gameState: GameState | null = null;
   private animationFrameId: number | null = null;
-  private keyState: { up: boolean; down: boolean } = { up: false, down: false };
-  private lastPaddleUpdate: number = 0;
-  private readonly paddleUpdateInterval: number = 60; // ms
+
+  // Contrôles
+  private keyState = { up: false, down: false };
+  private lastPaddleUpdate = 0;
+  private readonly paddleUpdateInterval = 60; // ms
 
   connectedCallback() {
     super.connectedCallback();
@@ -50,7 +100,7 @@ export class TournamentGame extends PropsBaseComponent {
       const { status } = this.props as GameProps;
       if (status === "IN_PROGRESS") {
         console.log("Match is already in progress, initializing game");
-        this.gameStarted = true;
+        this.matchState.isStarted = true;
 
         // Demander l'état actuel du jeu via le socket
         const { tournamentId, matchId } = this.props as GameProps;
@@ -87,23 +137,32 @@ export class TournamentGame extends PropsBaseComponent {
     const player1IdNum = player1 ? Number(player1.id) : undefined;
     const player2IdNum = player2 ? Number(player2.id) : undefined;
 
-    this.isPlayer1 = player1IdNum === currentUserIdNum;
-    this.isPlayer2 = player2IdNum === currentUserIdNum;
+    this.playerState.isPlayer1 = player1IdNum === currentUserIdNum;
+    this.playerState.isPlayer2 = player2IdNum === currentUserIdNum;
 
     console.log("Player status result:", {
-      isPlayer1: this.isPlayer1,
-      isPlayer2: this.isPlayer2,
-      isPlayer: this.isPlayer1 || this.isPlayer2,
+      isPlayer1: this.playerState.isPlayer1,
+      isPlayer2: this.playerState.isPlayer2,
+      isPlayer: this.playerState.isPlayer1 || this.playerState.isPlayer2,
     });
   }
 
   private setupSocketListeners() {
     console.log("Setting up socket listeners");
 
-    tournamentSocket.onGameUpdate((stateData: any) => {
-      console.log("Game state update received:", stateData);
+    tournamentSocket.on("match:ready", (data) => {
+      const { player1Ready, player2Ready } = data;
 
-      // Vérifier que l'état a la structure attendue
+      if (this.playerState.isPlayer1) {
+        this.playerState.isReady = player1Ready;
+      } else if (this.playerState.isPlayer2) {
+        this.playerState.isReady = player2Ready;
+      }
+
+      this.render();
+    });
+
+    tournamentSocket.onGameUpdate((stateData: any) => {
       if (stateData && stateData.state) {
         this.gameState = stateData.state;
       } else if (
@@ -113,20 +172,12 @@ export class TournamentGame extends PropsBaseComponent {
         stateData.canvas &&
         stateData.scores
       ) {
-        // Si l'état est directement l'objet GameState sans être encapsulé
         this.gameState = stateData;
       } else {
         console.error("Invalid game state format:", stateData);
         return;
       }
 
-      // Mettre à jour les scores si disponibles
-      if (this.gameState && this.gameState.scores) {
-        this.player1Score = this.gameState.scores.left;
-        this.player2Score = this.gameState.scores.right;
-      }
-
-      // Forcer le rendu immédiatement après avoir reçu l'état du jeu
       if (this.canvas && this.ctx) {
         try {
           this.drawGame();
@@ -136,56 +187,24 @@ export class TournamentGame extends PropsBaseComponent {
         }
       }
 
-      if (!this.gameStarted && this.gameState) {
-        console.log("Starting game loop from state update");
-        this.gameStarted = true;
+      if (!this.matchState.isStarted && this.gameState) {
+        this.matchState.isStarted = true;
         this.startGameLoop();
       }
     });
 
     tournamentSocket.onMatchStart(() => {
-      console.log("Match start event received");
-      this.gameStarted = true;
-      this.matchEnded = false;
-      this.winnerId = null;
+      this.matchState.isStarted = true;
+      this.matchState.isEnded = false;
+      this.matchState.winnerId = null;
       this.render();
       this.startGameLoop();
     });
 
-    tournamentSocket.onScore((data) => {
-      console.log("Score update received:", data);
-      if (
-        data &&
-        typeof data.player1Score === "number" &&
-        typeof data.player2Score === "number"
-      ) {
-        this.player1Score = data.player1Score;
-        this.player2Score = data.player2Score;
-
-        const props = this.props as GameProps;
-        if (props.player1) props.player1.score = data.player1Score;
-        if (props.player2) props.player2.score = data.player2Score;
-
-        console.log("Scores updated:", {
-          player1Score: this.player1Score,
-          player2Score: this.player2Score,
-        });
-
-        // Mettre à jour les scores dans l'état du jeu si disponible
-        if (this.gameState && this.gameState.scores) {
-          this.gameState.scores.left = data.player1Score;
-          this.gameState.scores.right = data.player2Score;
-        }
-
-        this.render();
-      }
-    });
-
     tournamentSocket.onMatchEnd((data) => {
-      console.log("Match end event received:", data);
-      this.matchEnded = true;
-      this.gameStarted = false;
-      this.winnerId = data.winnerId;
+      this.matchState.isEnded = true;
+      this.matchState.isStarted = false;
+      this.matchState.winnerId = data.winnerId;
       this.cleanupGame();
       this.render();
     });
@@ -200,7 +219,7 @@ export class TournamentGame extends PropsBaseComponent {
       return;
     }
 
-    this.isReady = true;
+    this.playerState.isReady = true;
     tournamentSocket.sendPlayerReady(tournamentId, matchId);
     console.log("Player ready sent to server");
     this.render();
@@ -230,7 +249,7 @@ export class TournamentGame extends PropsBaseComponent {
       // Si nous avons déjà un état de jeu, démarrer la boucle de jeu
       if (this.gameState) {
         console.log("Game state already exists, starting game loop");
-        this.gameStarted = true;
+        this.matchState.isStarted = true;
         this.startGameLoop();
       } else {
         // Dessiner un état initial vide
@@ -425,7 +444,11 @@ export class TournamentGame extends PropsBaseComponent {
   }
 
   private updatePaddlePosition() {
-    if (!this.gameState || (!this.isPlayer1 && !this.isPlayer2)) return;
+    if (
+      !this.gameState ||
+      (!this.playerState.isPlayer1 && !this.playerState.isPlayer2)
+    )
+      return;
 
     const now = Date.now();
     if (now - this.lastPaddleUpdate < this.paddleUpdateInterval) return;
@@ -435,7 +458,7 @@ export class TournamentGame extends PropsBaseComponent {
     if (!tournamentId || !matchId) return;
 
     if (this.keyState.up || this.keyState.down) {
-      const paddle = this.isPlayer1
+      const paddle = this.playerState.isPlayer1
         ? this.gameState.paddles.left
         : this.gameState.paddles.right;
       const canvasHeight = this.gameState.canvas.height;
@@ -531,8 +554,12 @@ export class TournamentGame extends PropsBaseComponent {
     );
     this.drawBall(ctx, ball.x, ball.y, 10);
 
-    // Draw ready status if needed
-    if (players && (!players.player1Ready || !players.player2Ready)) {
+    // Draw ready status only if game hasn't started yet
+    if (
+      !this.matchState.isStarted &&
+      players &&
+      (!players.player1Ready || !players.player2Ready)
+    ) {
       this.drawReadyStatus(ctx, canvas, players);
     }
 
@@ -659,8 +686,8 @@ export class TournamentGame extends PropsBaseComponent {
 
     // Reset game state
     this.gameState = null;
-    this.gameStarted = false;
-    this.isReady = false;
+    this.matchState.isStarted = false;
+    this.playerState.isReady = false;
     this.keyState = { up: false, down: false };
     this.lastPaddleUpdate = 0;
 
@@ -696,12 +723,12 @@ export class TournamentGame extends PropsBaseComponent {
       return;
     }
 
-    this.gameStarted = true;
+    this.matchState.isStarted = true;
 
     // Mettre à jour les scores si disponibles
     if (this.gameState && this.gameState.scores) {
-      this.player1Score = this.gameState.scores.left;
-      this.player2Score = this.gameState.scores.right;
+      this.gameState.scores.left = data.scores.left;
+      this.gameState.scores.right = data.scores.right;
     }
 
     // Forcer le rendu immédiatement
@@ -765,15 +792,15 @@ export class TournamentGame extends PropsBaseComponent {
 
   render() {
     const { player1, player2, status } = this.props as GameProps;
-    const isPlayer = this.isPlayer1 || this.isPlayer2;
+    const isPlayer = this.playerState.isPlayer1 || this.playerState.isPlayer2;
 
-    const p1Score = this.player1Score || player1?.score || 0;
-    const p2Score = this.player2Score || player2?.score || 0;
+    const p1Score = this.gameState?.scores.left || player1?.score || 0;
+    const p2Score = this.gameState?.scores.right || player2?.score || 0;
 
     let winner, loser;
-    if (this.matchEnded && this.winnerId) {
+    if (this.matchState.isEnded && this.matchState.winnerId) {
       if (player1 && player2) {
-        if (player1.id === this.winnerId) {
+        if (player1.id === this.matchState.winnerId) {
           winner = player1;
           loser = player2;
         } else {
@@ -784,14 +811,14 @@ export class TournamentGame extends PropsBaseComponent {
     }
 
     console.log("Rendering game component:", {
-      isReady: this.isReady,
-      gameStarted: this.gameStarted,
-      matchEnded: this.matchEnded,
+      isReady: this.playerState.isReady,
+      gameStarted: this.matchState.isStarted,
+      matchEnded: this.matchState.isEnded,
       status,
       isPlayer,
       player1Score: p1Score,
       player2Score: p2Score,
-      winnerId: this.winnerId,
+      winnerId: this.matchState.winnerId,
     });
 
     this.innerHTML = /* html */ `
@@ -805,7 +832,7 @@ export class TournamentGame extends PropsBaseComponent {
             <div class="bg-gray-800 p-2 rounded">
               <span class="font-semibold">Role:</span> ${
                 isPlayer
-                  ? this.isPlayer1
+                  ? this.playerState.isPlayer1
                     ? "Player 1"
                     : "Player 2"
                   : "Spectator"
@@ -813,7 +840,7 @@ export class TournamentGame extends PropsBaseComponent {
             </div>
             <div class="bg-gray-800 p-2 rounded">
               <span class="font-semibold">Ready:</span> ${
-                this.isReady ? "Yes" : "No"
+                this.playerState.isReady ? "Yes" : "No"
               }
             </div>
           </div>
@@ -838,7 +865,7 @@ export class TournamentGame extends PropsBaseComponent {
         </div>
 
         ${
-          status === "IN_PROGRESS" && isPlayer && !this.isReady
+          status === "IN_PROGRESS" && isPlayer && !this.playerState.isReady
             ? /* html */ `
             <button
               id="readyButton"
@@ -851,7 +878,7 @@ export class TournamentGame extends PropsBaseComponent {
         }
 
         ${
-          this.gameStarted || status === "IN_PROGRESS"
+          this.matchState.isStarted || status === "IN_PROGRESS"
             ? /* html */ `
             <div class="mt-4 w-full">
               <div class="canvas-container w-full flex justify-center">
@@ -882,7 +909,7 @@ export class TournamentGame extends PropsBaseComponent {
         }
 
         ${
-          this.matchEnded && winner && loser
+          this.matchState.isEnded && winner && loser
             ? /* html */ `
             <div class="mt-4 p-4 bg-green-800 rounded text-center">
               <p class="text-xl font-bold">Match terminé!</p>

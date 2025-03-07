@@ -29,7 +29,7 @@ export class GameService {
   private games: Map<number, GameState>;
   private readonly paddleWidth = 10;
   private readonly paddleHeight = 100;
-  private readonly ballSpeed = 5;
+  private readonly ballSpeed = 8; // Vitesse constante de la balle
 
   constructor() {
     this.games = new Map();
@@ -98,30 +98,29 @@ export class GameService {
     state.ball.x += state.ball.dx;
     state.ball.y += state.ball.dy;
 
-    // Check if the ball hits the top or bottom of the canvas
+    // Collision avec les murs (haut/bas)
     if (state.ball.y <= 0 || state.ball.y >= state.canvas.height) {
       state.ball.dy = -state.ball.dy;
     }
 
-    // Check if the ball hits the left paddle
+    // Collision avec les raquettes
     if (
       state.ball.x <= this.paddleWidth &&
       state.ball.y >= state.paddles.left.y &&
       state.ball.y <= state.paddles.left.y + state.paddles.left.height
     ) {
-      state.ball.dx = this.ballSpeed;
+      state.ball.dx = this.ballSpeed; // Rebond vers la droite
     }
 
-    // Check if the ball hits the right paddle
     if (
       state.ball.x >= state.canvas.width - this.paddleWidth &&
       state.ball.y >= state.paddles.right.y &&
       state.ball.y <= state.paddles.right.y + state.paddles.right.height
     ) {
-      state.ball.dx = -this.ballSpeed;
+      state.ball.dx = -this.ballSpeed; // Rebond vers la gauche
     }
 
-    // Check if the ball hits the left side of the canvas
+    // Point marqué
     if (state.ball.x <= 0) {
       state.scores.right++;
       this.resetBall(matchId, "right");
@@ -139,7 +138,7 @@ export class GameService {
       x: state.canvas.width / 2,
       y: state.canvas.height / 2,
       dx: serveDirection === "left" ? -this.ballSpeed : this.ballSpeed,
-      dy: this.ballSpeed,
+      dy: Math.random() > 0.5 ? this.ballSpeed : -this.ballSpeed, // Direction aléatoire haut/bas
     };
   }
 

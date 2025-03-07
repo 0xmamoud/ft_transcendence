@@ -15,6 +15,7 @@ interface TournamentEvents {
 interface MatchEvents {
   ready: { tournamentId: number; matchId: number };
   move: { tournamentId: number; matchId: number; position: number };
+  getState: { tournamentId: number; matchId: number };
 }
 
 export class EventHandlerService {
@@ -59,6 +60,10 @@ export class EventHandlerService {
 
     this.eventHandlers.set("match:move", (socket, data) =>
       this.handleMatchMove(socket, data)
+    );
+
+    this.eventHandlers.set("match:getState", (socket, data) =>
+      this.handleMatchGetState(socket, data)
     );
   }
 
@@ -307,65 +312,142 @@ export class EventHandlerService {
     }
 
     const gameState = this.gameService.getGameState(data.matchId);
-    if (gameState) {
-      this.gameService.movePaddle(data.matchId, "left", data.position);
+    if (!gameState) return;
 
-      this.socketService.broadcastToRoom(data.tournamentId, "match:update", {
-        matchId: data.matchId,
-        state: this.gameService.getGameState(data.matchId),
-      });
+    // Déterminer quel joueur envoie la commande
+    const isPlayer1 = client.userId === gameState.players.player1Id;
+    const isPlayer2 = client.userId === gameState.players.player2Id;
+
+    // Mettre à jour le paddle correspondant
+    if (isPlayer1) {
+      this.gameService.movePaddle(data.matchId, "left", data.position);
+    } else if (isPlayer2) {
+      this.gameService.movePaddle(data.matchId, "right", data.position);
+    }
+
+    // Envoyer la mise à jour à tous les clients
+    this.socketService.broadcastToRoom(data.tournamentId, "match:update", {
+      matchId: data.matchId,
+      state: this.gameService.getGameState(data.matchId),
+    });
+  }
+
+  private handleMatchGetState(
+    socket: WebSocket,
+    data: MatchEvents["getState"]
+  ): void {
+    const client = this.socketService.getClient(socket);
+    if (!client) return;
+
+    if (!this.socketService.isInRoom(socket, data.tournamentId)) {
+      socket.send(
+        JSON.stringify({
+          event: "error",
+          data: { message: "You are not in this tournament" },
+        })
+      );
+      return;
+    }
+
+    try {
+      // Récupérer l'état actuel du jeu
+      const gameState = this.gameService.getGameState(data.matchId);
+
+      if (!gameState) {
+        socket.send(
+          JSON.stringify({
+            event: "error",
+            data: { message: "Game state not found for this match" },
+          })
+        );
+        return;
+      }
+
+      // Envoyer l'état du jeu uniquement au client qui l'a demandé
+      socket.send(
+        JSON.stringify({
+          event: "match:update",
+          data: {
+            matchId: data.matchId,
+            state: gameState,
+          },
+        })
+      );
+
+      console.log(
+        `Sent game state for match ${data.matchId} to user ${client.userId}`
+      );
+    } catch (error: any) {
+      console.error("Failed to get game state:", error);
+      socket.send(
+        JSON.stringify({
+          event: "error",
+          data: {
+            message: error.message || "Failed to get game state",
+          },
+        })
+      );
     }
   }
 
   private startGameLoop(tournamentId: number, matchId: number): void {
     if (this.gameLoops.has(matchId)) {
       clearInterval(this.gameLoops.get(matchId));
+      this.gameLoops.delete(matchId);
     }
 
+    // Réduire la fréquence des mises à jour à 30fps au lieu de 60fps
     const gameLoop = setInterval(() => {
       const gameState = this.gameService.getGameState(matchId);
-      if (gameState) {
-        // Sauvegarder les scores actuels
-        const currentScoreLeft = gameState.scores.left;
-        const currentScoreRight = gameState.scores.right;
-
-        // Mettre à jour la position de la balle et vérifier les collisions
-        this.gameService.updateBall(matchId);
-
-        // Récupérer l'état mis à jour
-        const updatedGameState = this.gameService.getGameState(matchId);
-        if (!updatedGameState) return;
-
-        // Vérifier si les scores ont changé
-        if (
-          updatedGameState.scores.left !== currentScoreLeft ||
-          updatedGameState.scores.right !== currentScoreRight
-        ) {
-          // Envoyer une mise à jour de score aux clients
-          this.socketService.broadcastToRoom(tournamentId, "match:score", {
-            matchId,
-            player1Score: updatedGameState.scores.left,
-            player2Score: updatedGameState.scores.right,
-          });
-
-          // Ne pas mettre à jour la base de données à chaque changement de score
-          // On le fera uniquement à la fin du match
+      if (!gameState) {
+        // Nettoyer l'intervalle si le jeu n'existe plus
+        if (this.gameLoops.has(matchId)) {
+          clearInterval(this.gameLoops.get(matchId));
+          this.gameLoops.delete(matchId);
         }
-
-        this.socketService.broadcastToRoom(tournamentId, "match:update", {
-          matchId,
-          state: updatedGameState,
-        });
-
-        // Changer le score gagnant à 5 au lieu de 11
-        if (
-          updatedGameState.scores.left >= 5 ||
-          updatedGameState.scores.right >= 5
-        ) {
-          this.endMatch(tournamentId, matchId);
-        }
+        return;
       }
-    }, 1000 / 60);
+
+      // Sauvegarder les scores actuels
+      const currentScoreLeft = gameState.scores.left;
+      const currentScoreRight = gameState.scores.right;
+
+      // Mettre à jour la position de la balle et vérifier les collisions
+      this.gameService.updateBall(matchId);
+
+      // Récupérer l'état mis à jour
+      const updatedGameState = this.gameService.getGameState(matchId);
+      if (!updatedGameState) return;
+
+      // N'envoyer les mises à jour que si nécessaire
+      const scoreChanged =
+        updatedGameState.scores.left !== currentScoreLeft ||
+        updatedGameState.scores.right !== currentScoreRight;
+
+      if (scoreChanged) {
+        this.socketService.broadcastToRoom(tournamentId, "match:score", {
+          matchId,
+          player1Score: updatedGameState.scores.left,
+          player2Score: updatedGameState.scores.right,
+        });
+      }
+
+      // Envoyer la mise à jour de l'état
+      this.socketService.broadcastToRoom(tournamentId, "match:update", {
+        matchId,
+        state: updatedGameState,
+      });
+
+      if (
+        updatedGameState.scores.left >= 5 ||
+        updatedGameState.scores.right >= 5
+      ) {
+        // Nettoyer l'intervalle avant de terminer le match
+        clearInterval(this.gameLoops.get(matchId));
+        this.gameLoops.delete(matchId);
+        this.endMatch(tournamentId, matchId);
+      }
+    }, 1000 / 30); // 30fps au lieu de 60fps
 
     this.gameLoops.set(matchId, gameLoop);
   }

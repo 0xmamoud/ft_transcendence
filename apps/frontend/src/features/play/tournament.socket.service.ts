@@ -58,6 +58,13 @@ class TournamentSocketService extends SocketService {
     });
   }
 
+  getGameState(tournamentId: number, matchId: number): void {
+    this.emit("match:getState", {
+      tournamentId,
+      matchId,
+    });
+  }
+
   onGameUpdate(callback: (state: GameState) => void): void {
     this.on("match:update", callback);
   }

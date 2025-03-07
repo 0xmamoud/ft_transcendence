@@ -86,34 +86,6 @@ class TournamentPage extends ParamsBaseComponent {
     }
   }
 
-  private async loadParticipants() {
-    try {
-      const tournamentId = Number(this.params.id);
-      this.tournamentParticipants =
-        await tournamentService.getTournamentParticipants(tournamentId);
-
-      this.currentUsername =
-        this.tournamentParticipants.find((p) => p.userId === this.currentUser)
-          ?.username || this.defaultUsername;
-
-      this.render();
-    } catch (error) {
-      console.error("Failed to load participants:", error);
-    }
-  }
-
-  private async loadMatches() {
-    try {
-      const tournamentId = Number(this.params.id);
-      this.tournamentMatches = await tournamentService.getTournamentMatches(
-        tournamentId
-      );
-      this.render();
-    } catch (error) {
-      console.error("Failed to load matches:", error);
-    }
-  }
-
   private async setupWebSocket() {
     try {
       await tournamentSocket.initialize();
@@ -136,7 +108,11 @@ class TournamentPage extends ParamsBaseComponent {
         timestamp: new Date().toLocaleTimeString(),
         isOnline: true,
       });
-      this.loadParticipants();
+
+      if (this.tournamentParticipants.length !== data.participants.length) {
+        this.tournamentParticipants = data.participants;
+        this.render();
+      }
     });
 
     tournamentSocket.on("tournament:leave", (data) => {
@@ -147,7 +123,6 @@ class TournamentPage extends ParamsBaseComponent {
         timestamp: new Date().toLocaleTimeString(),
         isOnline: true,
       });
-      this.loadParticipants();
     });
 
     tournamentSocket.on("tournament:start", (data) => {
@@ -159,19 +134,60 @@ class TournamentPage extends ParamsBaseComponent {
         timestamp: new Date().toLocaleTimeString(),
         isOnline: true,
       });
-      this.loadMatches();
-      this.loadTournament();
+
+      if (data.matches) {
+        this.tournamentMatches = data.matches;
+      }
+
+      if (this.tournament) {
+        this.tournament.status = "IN_PROGRESS";
+      } else {
+        this.loadTournament();
+      }
+
+      this.render();
     });
 
-    tournamentSocket.on("tournament:finish", (data) => {
+    tournamentSocket.on("match:end", (data) => {
+      console.log("match:end", data);
+
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
-        message: data.message,
+        message: `Match #${data.matchId} terminé. Résultat: ${data.player1Score}-${data.player2Score}`,
         timestamp: new Date().toLocaleTimeString(),
         isOnline: true,
       });
-      this.loadTournament();
+
+      if (data.matches) {
+        this.tournamentMatches = data.matches;
+      }
+
+      this.render();
+    });
+
+    tournamentSocket.on("tournament:finish", (data) => {
+      console.log("tournament:finish", data);
+
+      this.addChatMessage({
+        id: Date.now().toString(),
+        username: "System",
+        message: data.message || "Le tournoi est terminé !",
+        timestamp: new Date().toLocaleTimeString(),
+        isOnline: true,
+      });
+
+      if (data.matches) {
+        this.tournamentMatches = data.matches;
+      }
+
+      if (this.tournament) {
+        this.tournament.status = "COMPLETED";
+      } else {
+        this.loadTournament();
+      }
+
+      this.render();
     });
 
     tournamentSocket.on("tournament:chat", (data) => {
@@ -208,16 +224,15 @@ class TournamentPage extends ParamsBaseComponent {
     this.render();
   }
 
-  private async handleStartTournament() {
+  private handleStartTournament() {
     try {
       const tournamentId = Number(this.params.id);
-      await tournamentService.startTournament(tournamentId);
+
+      tournamentSocket.startTournament(tournamentId);
 
       if (this.tournament) {
         this.tournament.status = "IN_PROGRESS";
       }
-
-      tournamentSocket.startTournament(tournamentId);
 
       this.render();
     } catch (error) {

@@ -46,7 +46,6 @@ export interface ITournamentService {
   createTournament(data: CreateTournamentDto): Promise<Tournament>;
   getTournament(id: number): Promise<Tournament>;
   joinTournament(id: number, data?: JoinTournamentDto): Promise<Participant>;
-  startTournament(id: number): Promise<Match[]>;
   getTournamentParticipants(id: number): Promise<Participant[]>;
   getTournamentMatches(id: number): Promise<Match[]>;
 }

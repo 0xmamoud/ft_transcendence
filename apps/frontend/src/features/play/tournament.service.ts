@@ -72,21 +72,6 @@ class TournamentService implements ITournamentService {
     return responseData;
   }
 
-  async startTournament(id: number) {
-    const response = await fetch(`/api/tournaments/start/${id}`, {
-      method: "POST",
-      credentials: "include",
-    });
-
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      throw new Error(`Failed to start tournament: ${responseData.message}`);
-    }
-
-    return responseData;
-  }
-
   async getTournamentParticipants(id: number) {
     const response = await fetch(`/api/tournaments/${id}/participants`, {
       method: "GET",

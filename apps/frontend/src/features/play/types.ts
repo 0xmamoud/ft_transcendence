@@ -1,4 +1,4 @@
-interface User {
+export interface User {
   id: number;
   username: string;
 }
@@ -15,19 +15,20 @@ export interface Match {
   tournamentId: number;
   player1Id: number;
   player2Id: number;
-  player1Score?: number;
-  player2Score?: number;
-  status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
-  player1: User;
-  player2: User;
+  player1Score: number;
+  player2Score: number;
+  player1: { username: string };
+  player2: { username: string };
+  status: string;
+  winnerId?: number;
 }
 
 export interface Tournament {
   id: number;
   name: string;
   creatorId: number;
+  status: string;
   maxParticipants?: number;
-  status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   participants: Participant[];
   matches: Match[];
 }

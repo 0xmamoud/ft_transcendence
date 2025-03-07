@@ -5,7 +5,12 @@ import "@/features/play/components/tournament.matches";
 import "@/features/play/components/tournament.participants";
 import { tournamentService } from "@/features/play/tournament.service";
 import { tournamentSocket } from "@/features/play/tournament.socket.service";
-import type { Tournament, Match, Participant } from "@/features/play/types";
+import type {
+  Tournament,
+  Match,
+  Participant,
+  User,
+} from "@/features/play/types";
 import { userService } from "@/features/shared/user.service";
 import { router } from "@/main";
 
@@ -13,9 +18,7 @@ class TournamentPage extends ParamsBaseComponent {
   private tournament: Tournament | null = null;
   private tournamentParticipants: Participant[] = [];
   private tournamentMatches: Match[] = [];
-  private currentUser: number | null = null;
-  private currentUsername: string = "";
-  private defaultUsername: string = "SINJ";
+  private currentUser: User | null = null;
   private messages: Array<{
     id: string;
     username: string;
@@ -65,8 +68,10 @@ class TournamentPage extends ParamsBaseComponent {
 
   private async loadUserProfile() {
     const userProfile = await userService.getUserProfile();
-    this.currentUser = userProfile.id;
-    this.defaultUsername = userProfile.username;
+    this.currentUser = {
+      id: userProfile.id,
+      username: userProfile.username,
+    };
   }
 
   private async loadTournament() {
@@ -76,10 +81,6 @@ class TournamentPage extends ParamsBaseComponent {
       if (this.tournament) {
         this.tournamentParticipants = this.tournament.participants || [];
         this.tournamentMatches = this.tournament.matches || [];
-        this.currentUsername =
-          this.tournament.participants.find(
-            (p) => p.userId === this.currentUser
-          )?.username || this.defaultUsername;
       }
     } catch (error) {
       console.error("Failed to load tournament:", error);
@@ -319,7 +320,7 @@ class TournamentPage extends ParamsBaseComponent {
                       </span>
                     </div>
                     ${
-                      this.tournament?.creatorId === this.currentUser &&
+                      this.tournament?.creatorId === this.currentUser?.id &&
                       this.tournament?.status?.toLowerCase() === "pending"
                         ? /* html */ `
                     <button
@@ -350,7 +351,7 @@ class TournamentPage extends ParamsBaseComponent {
                         })
                       ),
                       isCreator:
-                        this.tournament?.creatorId === this.currentUser,
+                        this.tournament?.creatorId === this.currentUser?.id,
                     }).replace(/'/g, "&apos;")}'
                   ></tournament-participants>
                 </div>
@@ -394,7 +395,7 @@ class TournamentPage extends ParamsBaseComponent {
                           score: currentMatch.player2Score || 0,
                         }
                       : undefined,
-                    currentUserId: Number(this.currentUser),
+                    currentUserId: Number(this.currentUser?.id),
                     matchId: currentMatch?.id
                       ? Number(currentMatch.id)
                       : undefined,
@@ -407,7 +408,7 @@ class TournamentPage extends ParamsBaseComponent {
                 <tournament-chat
                   props='${JSON.stringify({
                     messages: this.messages,
-                    currentUsername: this.currentUsername,
+                    currentUsername: this.currentUser?.username,
                     tournamentId: Number(this.params.id),
                   }).replace(/'/g, "&apos;")}'
                 ></tournament-chat>

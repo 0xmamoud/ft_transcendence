@@ -253,17 +253,15 @@ export class EventHandlerService {
     const match = await this.matchService.getMatch(data.matchId);
     if (!match) return;
 
-    if (!this.gameService.getGameState(data.matchId)) {
+    // Créer le jeu s'il n'existe pas déjà
+    if (!this.gameService.getGameState()) {
       this.gameService.createGame(
         data.matchId,
-        800,
-        600,
         match.player1Id,
         match.player2Id
       );
     }
 
-    // Utiliser le nouveau système de ready state
     const bothPlayersReady = this.matchService.setPlayerReady(
       data.matchId,
       client.userId,
@@ -271,18 +269,15 @@ export class EventHandlerService {
       match.player2Id
     );
 
-    // Récupérer l'état actuel des ready
     const readyState = this.matchService.getReadyState(data.matchId);
     if (!readyState) return;
 
-    // Envoyer une mise à jour du ready state à tous les clients
     this.socketService.broadcastToRoom(data.tournamentId, "match:ready", {
       matchId: data.matchId,
       player1Ready: readyState.player1Ready,
       player2Ready: readyState.player2Ready,
     });
 
-    // Si les deux joueurs sont prêts, démarrer le jeu
     if (bothPlayersReady) {
       console.log("Both players ready, starting game", {
         tournamentId: data.tournamentId,
@@ -303,37 +298,10 @@ export class EventHandlerService {
 
   private handleMatchMove(socket: WebSocket, data: MatchEvents["move"]): void {
     const client = this.socketService.getClient(socket);
-    if (!client) return;
-
-    if (!this.socketService.isInRoom(socket, data.tournamentId)) {
-      socket.send(
-        JSON.stringify({
-          event: "error",
-          data: { message: "You are not in this tournament" },
-        })
-      );
+    if (!client || !this.socketService.isInRoom(socket, data.tournamentId))
       return;
-    }
 
-    const gameState = this.gameService.getGameState(data.matchId);
-    if (!gameState) return;
-
-    // Déterminer quel joueur envoie la commande
-    const isPlayer1 = client.userId === gameState.players.player1Id;
-    const isPlayer2 = client.userId === gameState.players.player2Id;
-
-    // Mettre à jour le paddle correspondant
-    if (isPlayer1) {
-      this.gameService.movePaddle(data.matchId, "left", data.position);
-    } else if (isPlayer2) {
-      this.gameService.movePaddle(data.matchId, "right", data.position);
-    }
-
-    // Envoyer la mise à jour à tous les clients
-    this.socketService.broadcastToRoom(data.tournamentId, "match:update", {
-      matchId: data.matchId,
-      state: this.gameService.getGameState(data.matchId),
-    });
+    this.gameService.movePaddle(client.userId, data.position);
   }
 
   private handleMatchGetState(
@@ -354,8 +322,7 @@ export class EventHandlerService {
     }
 
     try {
-      // Récupérer l'état actuel du jeu
-      const gameState = this.gameService.getGameState(data.matchId);
+      const gameState = this.gameService.getGameState();
 
       if (!gameState) {
         socket.send(
@@ -367,7 +334,6 @@ export class EventHandlerService {
         return;
       }
 
-      // Envoyer l'état du jeu uniquement au client qui l'a demandé
       socket.send(
         JSON.stringify({
           event: "match:update",
@@ -400,135 +366,85 @@ export class EventHandlerService {
       this.gameLoops.delete(matchId);
     }
 
-    // Réduire la fréquence des mises à jour à 30fps au lieu de 60fps
     const gameLoop = setInterval(() => {
-      const gameState = this.gameService.getGameState(matchId);
+      const gameState = this.gameService.getGameState();
       if (!gameState) {
-        // Nettoyer l'intervalle si le jeu n'existe plus
-        if (this.gameLoops.has(matchId)) {
-          clearInterval(this.gameLoops.get(matchId));
-          this.gameLoops.delete(matchId);
-        }
+        clearInterval(this.gameLoops.get(matchId));
+        this.gameLoops.delete(matchId);
         return;
       }
 
-      // Sauvegarder les scores actuels
-      const currentScoreLeft = gameState.scores.left;
-      const currentScoreRight = gameState.scores.right;
+      const scoreChanged = this.gameService.updateBall();
 
-      // Mettre à jour la position de la balle et vérifier les collisions
-      this.gameService.updateBall(matchId);
-
-      // Récupérer l'état mis à jour
-      const updatedGameState = this.gameService.getGameState(matchId);
-      if (!updatedGameState) return;
-
-      // N'envoyer les mises à jour que si nécessaire
-      const scoreChanged =
-        updatedGameState.scores.left !== currentScoreLeft ||
-        updatedGameState.scores.right !== currentScoreRight;
-
-      if (scoreChanged) {
-        this.socketService.broadcastToRoom(tournamentId, "match:score", {
-          matchId,
-          player1Score: updatedGameState.scores.left,
-          player2Score: updatedGameState.scores.right,
-        });
-      }
-
-      // Envoyer la mise à jour de l'état
       this.socketService.broadcastToRoom(tournamentId, "match:update", {
         matchId,
-        state: updatedGameState,
+        state: gameState,
       });
 
-      if (
-        updatedGameState.scores.left >= 5 ||
-        updatedGameState.scores.right >= 5
-      ) {
-        // Nettoyer l'intervalle avant de terminer le match
+      if (scoreChanged && this.gameService.isGameOver()) {
         clearInterval(this.gameLoops.get(matchId));
         this.gameLoops.delete(matchId);
         this.endMatch(tournamentId, matchId);
       }
-    }, 1000 / 30); // 30fps au lieu de 60fps
+    }, 1000 / 30);
 
     this.gameLoops.set(matchId, gameLoop);
   }
 
   private async endMatch(tournamentId: number, matchId: number): Promise<void> {
-    const gameState = this.gameService.getGameState(matchId);
+    const gameState = this.gameService.getGameState();
     if (!gameState) return;
 
-    const player1Id = this.gameService.getPlayer1Id(matchId);
-    const player2Id = this.gameService.getPlayer2Id(matchId);
+    const winnerId =
+      gameState.scores.player1 >= 5
+        ? this.gameService.getPlayerId(1)
+        : this.gameService.getPlayerId(2);
+    if (!winnerId) return;
 
-    if (!player1Id || !player2Id) return;
+    const finalScores = {
+      player1: gameState.scores.player1,
+      player2: gameState.scores.player2,
+    };
 
-    const winnerId = gameState.scores.left >= 5 ? player1Id : player2Id;
-    const player1Score = gameState.scores.left;
-    const player2Score = gameState.scores.right;
-
-    if (this.gameLoops.has(matchId)) {
-      clearInterval(this.gameLoops.get(matchId));
-      this.gameLoops.delete(matchId);
-    }
-
-    // Nettoyer le ready state
     this.matchService.resetReadyState(matchId);
-
-    this.gameService.removeGame(matchId);
+    this.gameService.reset();
 
     try {
       const result = await this.matchService.finishMatch(
         matchId,
         winnerId,
-        player1Score,
-        player2Score
+        finalScores.player1,
+        finalScores.player2
       );
 
       const freshMatches = await this.matchService.getTournamentMatches(
         tournamentId
       );
-
       this.socketService.broadcastToRoom(tournamentId, "match:end", {
         matchId,
         winnerId,
-        player1Score,
-        player2Score,
+        player1Score: finalScores.player1,
+        player2Score: finalScores.player2,
         matches: freshMatches,
       });
 
       const nextMatch = await this.matchService.startNextMatch(
         result.tournamentId
       );
-
-      if (nextMatch === null) {
-        const allCompleted = await this.matchService.areAllMatchesCompleted(
-          result.tournamentId
+      if (
+        !nextMatch &&
+        (await this.matchService.areAllMatchesCompleted(result.tournamentId))
+      ) {
+        await this.tournamentService.finishTournament(result.tournamentId);
+        const finalMatches = await this.matchService.getTournamentMatches(
+          tournamentId
         );
 
-        if (allCompleted) {
-          await this.tournamentService.finishTournament(result.tournamentId);
-
-          const finalMatches = await this.matchService.getTournamentMatches(
-            tournamentId
-          );
-
-          this.socketService.broadcastToRoom(
-            tournamentId,
-            "tournament:finish",
-            {
-              tournamentId,
-              message: "Tournament has been completed",
-              matches: finalMatches,
-            }
-          );
-
-          console.log("Tournament completed:", tournamentId);
-        }
-      } else {
-        console.log("Next match started:", nextMatch.id);
+        this.socketService.broadcastToRoom(tournamentId, "tournament:finish", {
+          tournamentId,
+          message: "Tournament has been completed",
+          matches: finalMatches,
+        });
       }
     } catch (error) {
       console.error("Error ending match:", error);

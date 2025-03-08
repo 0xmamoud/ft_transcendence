@@ -1,6 +1,6 @@
 export const GAME_CONFIG = {
   width: 800,
-  height: 400,
+  height: 600,
   backgroundColor: "#000000",
   lineColor: "#FFFFFF",
   textColor: "#FFFFFF",

@@ -20,7 +20,7 @@ export class GameService {
 
   private readonly paddleWidth = 10;
   private readonly paddleHeight = 100;
-  private readonly defaultSpeed = 8;
+  private readonly defaultSpeed = 10;
   private readonly canvasWidth = 800;
   private readonly canvasHeight = 600;
   private ballDirectionX = 1;

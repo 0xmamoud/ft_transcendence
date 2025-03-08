@@ -37,7 +37,7 @@ export class TournamentGame extends PropsBaseComponent {
   private gameState: GameState | null = null;
   private isReady = false;
 
-  // Dimensions du canvas
+  // Dimensions du canvas (mêmes valeurs que le serveur)
   private readonly canvasWidth = 800;
   private readonly canvasHeight = 600;
   private readonly paddleWidth = 10;
@@ -55,12 +55,9 @@ export class TournamentGame extends PropsBaseComponent {
 
   private setupGame() {
     this.render();
-
-    setTimeout(() => {
-      this.setupCanvas();
-      this.setupControls();
-      this.setupSocketListeners();
-    }, 0);
+    this.setupCanvas();
+    this.setupControls();
+    this.setupSocketListeners();
   }
 
   private setupCanvas() {
@@ -76,19 +73,9 @@ export class TournamentGame extends PropsBaseComponent {
       return;
     }
 
-    // Définir les dimensions réelles du canvas
     this.canvas.width = this.canvasWidth;
     this.canvas.height = this.canvasHeight;
 
-    // Appliquer le style pour le responsive
-    this.canvas.style.width = "100%";
-    this.canvas.style.height = "auto";
-    this.canvas.style.maxWidth = "800px";
-    this.canvas.style.backgroundColor = "black";
-    this.canvas.style.display = "block";
-    this.canvas.style.margin = "0 auto";
-
-    // Dessiner l'état initial
     this.drawEmptyState();
   }
 
@@ -96,34 +83,14 @@ export class TournamentGame extends PropsBaseComponent {
     const { currentUserId, player1, player2 } = this.props as GameProps;
     if (!currentUserId || (!player1?.id && !player2?.id)) return;
 
-    // Gérer les touches du clavier
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
-
-    // Gérer les boutons tactiles
-    const upButton = this.querySelector("#upButton");
-    const downButton = this.querySelector("#downButton");
-
-    if (upButton) {
-      upButton.addEventListener("touchstart", () => this.movePaddle("up"));
-      upButton.addEventListener("touchend", () => this.movePaddle("stop"));
-      upButton.addEventListener("mousedown", () => this.movePaddle("up"));
-      upButton.addEventListener("mouseup", () => this.movePaddle("stop"));
-    }
-
-    if (downButton) {
-      downButton.addEventListener("touchstart", () => this.movePaddle("down"));
-      downButton.addEventListener("touchend", () => this.movePaddle("stop"));
-      downButton.addEventListener("mousedown", () => this.movePaddle("down"));
-      downButton.addEventListener("mouseup", () => this.movePaddle("stop"));
-    }
   }
 
   private setupSocketListeners() {
     const { tournamentId, matchId } = this.props as GameProps;
     if (!tournamentId || !matchId) return;
 
-    // Écouter l'état ready des joueurs
     tournamentSocket.on("match:ready", (data) => {
       const { player1Ready, player2Ready } = data;
       const { currentUserId, player1, player2 } = this.props as GameProps;
@@ -137,20 +104,17 @@ export class TournamentGame extends PropsBaseComponent {
       this.render();
     });
 
-    // Écouter les mises à jour du jeu
     tournamentSocket.on("match:update", (data) => {
       if (data.state) {
         this.gameState = data.state;
-        this.drawGame();
+        requestAnimationFrame(() => this.drawGame());
       }
     });
 
-    // Écouter le début du match
     tournamentSocket.on("match:start", () => {
       this.render();
     });
 
-    // Écouter la fin du match
     tournamentSocket.on("match:end", () => {
       this.cleanupGame();
       this.render();
@@ -183,7 +147,7 @@ export class TournamentGame extends PropsBaseComponent {
     const currentPaddleY = this.getCurrentPlayerPaddleY();
     if (currentPaddleY === null) return;
 
-    const step = 20;
+    const step = 15;
     const newPosition =
       direction === "up"
         ? Math.max(0, currentPaddleY - step)
@@ -230,39 +194,18 @@ export class TournamentGame extends PropsBaseComponent {
   }
 
   private drawGame() {
-    if (!this.canvas || !this.ctx || !this.gameState) {
-      console.log("Cannot draw game:", {
-        hasCanvas: !!this.canvas,
-        hasContext: !!this.ctx,
-        hasGameState: !!this.gameState,
-        canvasWidth: this.canvas?.width,
-        canvasHeight: this.canvas?.height,
-      });
-      return;
-    }
-
-    // S'assurer que le canvas a les bonnes dimensions
-    if (
-      this.canvas.width !== this.canvasWidth ||
-      this.canvas.height !== this.canvasHeight
-    ) {
-      this.canvas.width = this.canvasWidth;
-      this.canvas.height = this.canvasHeight;
-    }
+    if (!this.canvas || !this.ctx || !this.gameState) return;
 
     const ctx = this.ctx;
     const { ball, paddles, scores } = this.gameState;
     const { player1, player2 } = this.props as GameProps;
 
-    // Effacer le canvas
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Dessiner le fond
-    ctx.fillStyle = "#000";
+    // Background
+    ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Dessiner la ligne centrale
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    // Center line
+    ctx.strokeStyle = "#FFFFFF";
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(this.canvas.width / 2, 0);
@@ -270,67 +213,45 @@ export class TournamentGame extends PropsBaseComponent {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Dessiner les scores
-    ctx.fillStyle = "#FFF";
-    ctx.font = "24px Arial";
+    // Scores
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "48px Poppins";
     ctx.textAlign = "center";
-    ctx.fillText(scores.player1.toString(), this.canvas.width / 4, 30);
-    ctx.fillText(scores.player2.toString(), (this.canvas.width / 4) * 3, 30);
+    ctx.fillText(scores.player1.toString(), this.canvas.width / 4, 50);
+    ctx.fillText(scores.player2.toString(), (this.canvas.width * 3) / 4, 50);
 
-    // Dessiner les noms des joueurs
+    // Player names
     if (player1 && player2) {
-      ctx.font = "14px Arial";
-      ctx.fillText(player1.username, this.canvas.width / 4, 50);
-      ctx.fillText(player2.username, (this.canvas.width / 4) * 3, 50);
+      ctx.font = "14px Poppins";
+      ctx.fillText(player1.username, this.canvas.width / 4, 80);
+      ctx.fillText(player2.username, (this.canvas.width * 3) / 4, 80);
     }
 
-    // Dessiner les raquettes
-    this.drawPaddle(ctx, 0, paddles.player1.y, "#4299e1");
-    this.drawPaddle(
-      ctx,
+    // Paddles
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, paddles.player1.y, this.paddleWidth, this.paddleHeight);
+    ctx.fillRect(
       this.canvas.width - this.paddleWidth,
       paddles.player2.y,
-      "#ed64a6"
+      this.paddleWidth,
+      this.paddleHeight
     );
 
-    // Dessiner la balle
-    this.drawBall(ctx, ball.x, ball.y);
-  }
-
-  private drawPaddle(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number,
-    color: string
-  ) {
-    ctx.save();
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, this.paddleWidth, this.paddleHeight);
-    ctx.restore();
-  }
-
-  private drawBall(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    const radius = 5;
-    ctx.save();
-    ctx.shadowColor = "#fff";
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    // Ball (carré de 10x10)
+    ctx.fillRect(ball.x - 5, ball.y - 5, 10, 10);
   }
 
   private drawEmptyState() {
     if (!this.canvas || !this.ctx) return;
 
     const ctx = this.ctx;
-    ctx.fillStyle = "#000";
+
+    // Background
+    ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    // Center line
+    ctx.strokeStyle = "#FFFFFF";
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(this.canvas.width / 2, 0);
@@ -338,8 +259,9 @@ export class TournamentGame extends PropsBaseComponent {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.fillStyle = "#FFF";
-    ctx.font = "20px Arial";
+    // Waiting message
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "24px Poppins";
     ctx.textAlign = "center";
     ctx.fillText(
       "En attente des joueurs...",
@@ -354,76 +276,65 @@ export class TournamentGame extends PropsBaseComponent {
       currentUserId === player1?.id || currentUserId === player2?.id;
 
     this.innerHTML = /* html */ `
-      <div class="flex flex-col items-center justify-center bg-gray-900 text-white p-4 rounded-lg w-full">
-        <div class="mb-4 text-center">
-          <h2 class="text-xl font-bold mb-2">Match Status</h2>
-          <div class="flex flex-wrap gap-2 justify-center">
-            <div class="bg-gray-800 p-2 rounded">
-              <span class="font-semibold">Status:</span> ${status}
-            </div>
-            ${
-              isPlayer
-                ? `
-              <div class="bg-gray-800 p-2 rounded">
-                <span class="font-semibold">Ready:</span> ${
-                  this.isReady ? "Yes" : "No"
-                }
+      <section class="padding-y">
+        <div class="game-container bg-background rounded-lg p-4 shadow-lg relative">
+          <div class="flex flex-col gap-4 items-center">
+            <div class="flex items-center justify-between w-full max-w-4xl">
+              <div class="flex items-center gap-4">
+                <div class="bg-blue-900 px-4 py-2 rounded">
+                  <span class="font-semibold">${
+                    player1?.username || "Waiting..."
+                  }</span>
+                </div>
+                <span class="text-2xl font-bold">VS</span>
+                <div class="bg-pink-900 px-4 py-2 rounded">
+                  <span class="font-semibold">${
+                    player2?.username || "Waiting..."
+                  }</span>
+                </div>
               </div>
-            `
+              <div class="flex items-center gap-2">
+                ${
+                  isPlayer
+                    ? `
+                  <div class="bg-gray-800 px-4 py-2 rounded">
+                    <span class="font-semibold">Ready: ${
+                      this.isReady ? "Yes" : "No"
+                    }</span>
+                  </div>
+                `
+                    : ""
+                }
+                <div class="bg-gray-800 px-4 py-2 rounded">
+                  <span class="font-semibold">Status: ${status}</span>
+                </div>
+              </div>
+            </div>
+
+            <canvas 
+              id="gameCanvas"
+              class="border border-secondary rounded shadow-lg"
+            ></canvas>
+
+            ${
+              status === "IN_PROGRESS" && isPlayer && !this.isReady
+                ? `<button id="readyButton" class="btn-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  Click to Start
+                </button>`
                 : ""
             }
           </div>
         </div>
 
-        <div class="mb-4 text-center">
-          <h3 class="text-lg font-bold mb-2">Players</h3>
-          <div class="flex justify-between gap-4">
-            <div class="bg-blue-900 p-2 rounded flex-1">
-              <div class="font-semibold">${
-                player1?.username || "Waiting..."
-              }</div>
-            </div>
-            <div class="bg-pink-900 p-2 rounded flex-1">
-              <div class="font-semibold">${
-                player2?.username || "Waiting..."
-              }</div>
-            </div>
-          </div>
-        </div>
-
-        ${
-          status === "IN_PROGRESS" && isPlayer && !this.isReady
-            ? `
-          <button id="readyButton" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors mb-4">
-            Click to Start
-          </button>
-        `
-            : ""
-        }
-
-        <div class="w-full max-w-[800px] mx-auto">
-          <div class="relative w-full" style="padding-top: 75%;">
-            <canvas 
-              id="gameCanvas"
-              class="absolute top-0 left-0 w-full h-full border border-gray-700 rounded shadow-lg"
-            ></canvas>
-          </div>
-        </div>
-
         ${
           isPlayer && status === "IN_PROGRESS"
-            ? `
-          <div class="text-center mt-4">
-            <p class="mb-2">Utilisez les flèches ↑ et ↓ pour déplacer votre raquette</p>
-            <div class="flex justify-center gap-4 mt-2">
-              <button id="upButton" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full text-xl shadow-lg transition-colors">↑</button>
-              <button id="downButton" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full text-xl shadow-lg transition-colors">↓</button>
-            </div>
-          </div>
-        `
+            ? `<div class="text-center mt-4">
+              <h2 class="text-xl font-bold mb-4">Controls</h2>
+              <p>Use ↑ and ↓ arrow keys to move your paddle</p>
+            </div>`
             : ""
         }
-      </div>
+      </section>
     `;
 
     this.setupCanvas();

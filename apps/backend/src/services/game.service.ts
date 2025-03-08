@@ -2,157 +2,155 @@ export interface GameState {
   ball: {
     x: number;
     y: number;
-    dx: number;
-    dy: number;
   };
   paddles: {
-    left: { y: number; height: number };
-    right: { y: number; height: number };
-  };
-  canvas: {
-    width: number;
-    height: number;
+    player1: { y: number };
+    player2: { y: number };
   };
   scores: {
-    left: number;
-    right: number;
-  };
-  players: {
-    player1Id: number;
-    player2Id: number;
-    player1Ready?: boolean;
-    player2Ready?: boolean;
+    player1: number;
+    player2: number;
   };
 }
 
 export class GameService {
-  private games: Map<number, GameState>;
+  private gameState: GameState | null = null;
+  private player1Id: number | null = null;
+  private player2Id: number | null = null;
+
   private readonly paddleWidth = 10;
   private readonly paddleHeight = 100;
-  private readonly ballSpeed = 8; // Vitesse constante de la balle
+  private readonly defaultSpeed = 8;
+  private readonly canvasWidth = 800;
+  private readonly canvasHeight = 600;
+  private ballDirectionX = 1;
+  private ballDirectionY = 1;
 
-  constructor() {
-    this.games = new Map();
-  }
+  createGame(matchId: number, player1Id: number, player2Id: number): void {
+    this.player1Id = player1Id;
+    this.player2Id = player2Id;
 
-  createGame(
-    matchId: number,
-    canvasWidth: number,
-    canvasHeight: number,
-    player1Id: number,
-    player2Id: number
-  ): void {
-    const initialState: GameState = {
+    this.gameState = {
       ball: {
-        x: canvasWidth / 2,
-        y: canvasHeight / 2,
-        dx: this.ballSpeed,
-        dy: this.ballSpeed,
+        x: this.canvasWidth / 2,
+        y: this.canvasHeight / 2,
       },
       paddles: {
-        left: {
-          y: canvasHeight / 2 - this.paddleHeight / 2,
-          height: this.paddleHeight,
-        },
-        right: {
-          y: canvasHeight / 2 - this.paddleHeight / 2,
-          height: this.paddleHeight,
-        },
-      },
-      canvas: {
-        width: canvasWidth,
-        height: canvasHeight,
+        player1: { y: this.canvasHeight / 2 - this.paddleHeight / 2 },
+        player2: { y: this.canvasHeight / 2 - this.paddleHeight / 2 },
       },
       scores: {
-        left: 0,
-        right: 0,
-      },
-      players: {
-        player1Id,
-        player2Id,
-        player1Ready: false,
-        player2Ready: false,
+        player1: 0,
+        player2: 0,
       },
     };
 
-    this.games.set(matchId, initialState);
+    this.ballDirectionX = Math.random() > 0.5 ? 1 : -1;
+    this.ballDirectionY = Math.random() > 0.5 ? 1 : -1;
   }
 
-  getPlayer1Id(matchId: number): number | undefined {
-    return this.games.get(matchId)?.players.player1Id;
+  getGameState(): GameState | null {
+    return this.gameState;
   }
 
-  getPlayer2Id(matchId: number): number | undefined {
-    return this.games.get(matchId)?.players.player2Id;
+  getPlayerId(playerNumber: 1 | 2): number | null {
+    return playerNumber === 1 ? this.player1Id : this.player2Id;
   }
 
-  getGameState(matchId: number): GameState | undefined {
-    return this.games.get(matchId);
-  }
-
-  updateBall(matchId: number): void {
-    const state = this.games.get(matchId);
-    if (!state) return;
-
-    // Update the ball position
-    state.ball.x += state.ball.dx;
-    state.ball.y += state.ball.dy;
-
-    // Collision avec les murs (haut/bas)
-    if (state.ball.y <= 0 || state.ball.y >= state.canvas.height) {
-      state.ball.dy = -state.ball.dy;
+  updateBall(): boolean {
+    if (!this.gameState) {
+      return false;
     }
 
-    // Collision avec les raquettes
+    let scoreChanged = false;
+
+    // Calculate new ball position
+    this.gameState.ball.x += this.defaultSpeed * this.ballDirectionX;
+    this.gameState.ball.y += this.defaultSpeed * this.ballDirectionY;
+
+    // Wall collisions (top/bottom)
     if (
-      state.ball.x <= this.paddleWidth &&
-      state.ball.y >= state.paddles.left.y &&
-      state.ball.y <= state.paddles.left.y + state.paddles.left.height
+      this.gameState.ball.y <= 0 ||
+      this.gameState.ball.y >= this.canvasHeight
     ) {
-      state.ball.dx = this.ballSpeed; // Rebond vers la droite
+      this.gameState.ball.y = Math.max(
+        0,
+        Math.min(this.gameState.ball.y, this.canvasHeight)
+      );
+      this.ballDirectionY = -this.ballDirectionY;
+    }
+
+    // Paddle collisions
+    if (
+      this.gameState.ball.x <= this.paddleWidth &&
+      this.gameState.ball.y >= this.gameState.paddles.player1.y &&
+      this.gameState.ball.y <=
+        this.gameState.paddles.player1.y + this.paddleHeight
+    ) {
+      this.gameState.ball.x = this.paddleWidth;
+      this.ballDirectionX = 1;
     }
 
     if (
-      state.ball.x >= state.canvas.width - this.paddleWidth &&
-      state.ball.y >= state.paddles.right.y &&
-      state.ball.y <= state.paddles.right.y + state.paddles.right.height
+      this.gameState.ball.x >= this.canvasWidth - this.paddleWidth &&
+      this.gameState.ball.y >= this.gameState.paddles.player2.y &&
+      this.gameState.ball.y <=
+        this.gameState.paddles.player2.y + this.paddleHeight
     ) {
-      state.ball.dx = -this.ballSpeed; // Rebond vers la gauche
+      this.gameState.ball.x = this.canvasWidth - this.paddleWidth;
+      this.ballDirectionX = -1;
     }
 
-    // Point marqué
-    if (state.ball.x <= 0) {
-      state.scores.right++;
-      this.resetBall(matchId, "right");
-    } else if (state.ball.x >= state.canvas.width) {
-      state.scores.left++;
-      this.resetBall(matchId, "left");
+    // Score points
+    if (this.gameState.ball.x <= 0) {
+      this.gameState.scores.player2++;
+      this.resetBall();
+      scoreChanged = true;
+    } else if (this.gameState.ball.x >= this.canvasWidth) {
+      this.gameState.scores.player1++;
+      this.resetBall();
+      scoreChanged = true;
     }
+
+    return scoreChanged;
   }
 
-  private resetBall(matchId: number, serveDirection: "left" | "right"): void {
-    const state = this.games.get(matchId);
-    if (!state) return;
+  private resetBall(): void {
+    if (!this.gameState) return;
 
-    state.ball = {
-      x: state.canvas.width / 2,
-      y: state.canvas.height / 2,
-      dx: serveDirection === "left" ? -this.ballSpeed : this.ballSpeed,
-      dy: Math.random() > 0.5 ? this.ballSpeed : -this.ballSpeed, // Direction aléatoire haut/bas
+    this.gameState.ball = {
+      x: this.canvasWidth / 2,
+      y: this.canvasHeight / 2,
     };
+
+    this.ballDirectionX = Math.random() > 0.5 ? 1 : -1;
+    this.ballDirectionY = Math.random() > 0.5 ? 1 : -1;
   }
 
-  movePaddle(matchId: number, side: "left" | "right", position: number): void {
-    const state = this.games.get(matchId);
-    if (!state) return;
+  movePaddle(playerId: number, position: number): void {
+    if (!this.gameState) return;
+    if (playerId !== this.player1Id && playerId !== this.player2Id) return;
 
-    const paddle = state.paddles[side];
-    if (position >= 0 && position + paddle.height <= state.canvas.height) {
-      paddle.y = position;
-    }
+    const playerNumber = playerId === this.player1Id ? "player1" : "player2";
+    const clampedPosition = Math.max(
+      0,
+      Math.min(position, this.canvasHeight - this.paddleHeight)
+    );
+    this.gameState.paddles[playerNumber].y = clampedPosition;
   }
 
-  removeGame(matchId: number): void {
-    this.games.delete(matchId);
+  isGameOver(): boolean {
+    return (
+      this.gameState !== null &&
+      (this.gameState.scores.player1 >= 5 || this.gameState.scores.player2 >= 5)
+    );
+  }
+
+  reset(): void {
+    this.gameState = null;
+    this.player1Id = null;
+    this.player2Id = null;
+    this.ballDirectionX = 1;
+    this.ballDirectionY = 1;
   }
 }

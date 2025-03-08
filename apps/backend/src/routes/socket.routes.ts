@@ -15,7 +15,8 @@ async function websocketRoutes(app: FastifyInstance) {
     socketService,
     gameService,
     tournamentService,
-    matchService
+    matchService,
+    app
   );
   const socketController = new SocketController(
     socketService,

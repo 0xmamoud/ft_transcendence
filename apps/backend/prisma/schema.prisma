@@ -54,8 +54,10 @@ model Tournament {
   name         String
   creator      User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   creatorId    Int
+  
   status       String       @default("PENDING")
   maxParticipants Int?
+  winnerId     Int?
   
   matches      Match[]
   participants Participant[]

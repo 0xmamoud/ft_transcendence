@@ -3,6 +3,7 @@ import "@/features/play/components/tournament.chat";
 import "@/features/play/components/tournament.game";
 import "@/features/play/components/tournament.matches";
 import "@/features/play/components/tournament.participants";
+import "@/features/play/components/tournament.finish";
 import { tournamentService } from "@/features/play/tournament.service";
 import { tournamentSocket } from "@/features/play/tournament.socket.service";
 import type {
@@ -19,6 +20,12 @@ class TournamentPage extends ParamsBaseComponent {
   private tournamentParticipants: Participant[] = [];
   private tournamentMatches: Match[] = [];
   private currentUser: User | null = null;
+  private tournamentWinner: {
+    id: number;
+    username: string;
+    avatar: string;
+    totalWins: number;
+  } | null = null;
   private messages: Array<{
     id: string;
     username: string;
@@ -78,9 +85,29 @@ class TournamentPage extends ParamsBaseComponent {
     try {
       const tournamentId = Number(this.params.id);
       this.tournament = await tournamentService.getTournament(tournamentId);
+
       if (this.tournament) {
         this.tournamentParticipants = this.tournament.participants || [];
         this.tournamentMatches = this.tournament.matches || [];
+
+        if (this.tournament.status === "COMPLETED") {
+          const winnerParticipant = this.tournamentParticipants.find(
+            (p) => p.userId === this.tournament?.winnerId
+          );
+
+          if (winnerParticipant) {
+            const victories = this.tournamentMatches.filter(
+              (match) => match.winnerId === winnerParticipant.userId
+            ).length;
+
+            this.tournamentWinner = {
+              id: winnerParticipant.userId,
+              username: winnerParticipant.username,
+              avatar: winnerParticipant.avatar || "",
+              totalWins: victories,
+            };
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load tournament:", error);
@@ -180,6 +207,10 @@ class TournamentPage extends ParamsBaseComponent {
 
       if (data.matches) {
         this.tournamentMatches = data.matches;
+      }
+
+      if (data.winner) {
+        this.tournamentWinner = data.winner;
       }
 
       if (this.tournament) {
@@ -378,30 +409,43 @@ class TournamentPage extends ParamsBaseComponent {
               </div>
 
               <div class="lg:col-span-7 flex flex-col gap-4 order-1 lg:order-2">
-                <tournament-game
-                  props='${JSON.stringify({
-                    status: currentMatch?.status || "PENDING",
-                    player1: currentMatch?.player1
-                      ? {
-                          id: Number(currentMatch.player1Id),
-                          username: currentMatch.player1.username,
-                          score: currentMatch.player1Score || 0,
-                        }
-                      : undefined,
-                    player2: currentMatch?.player2
-                      ? {
-                          id: Number(currentMatch.player2Id),
-                          username: currentMatch.player2.username,
-                          score: currentMatch.player2Score || 0,
-                        }
-                      : undefined,
-                    currentUserId: Number(this.currentUser?.id),
-                    matchId: currentMatch?.id
-                      ? Number(currentMatch.id)
-                      : undefined,
-                    tournamentId: Number(this.params.id),
-                  }).replace(/'/g, "&apos;")}'
-                ></tournament-game>
+                ${
+                  this.tournament?.status === "COMPLETED"
+                    ? /* html */ `
+                    <tournament-finish
+                      props='${JSON.stringify({
+                        winner: this.tournamentWinner,
+                        matches: this.tournamentMatches,
+                      }).replace(/'/g, "&apos;")}'
+                    ></tournament-finish>
+                  `
+                    : /* html */ `
+                    <tournament-game
+                      props='${JSON.stringify({
+                        status: currentMatch?.status || "PENDING",
+                        player1: currentMatch?.player1
+                          ? {
+                              id: Number(currentMatch.player1Id),
+                              username: currentMatch.player1.username,
+                              score: currentMatch.player1Score || 0,
+                            }
+                          : undefined,
+                        player2: currentMatch?.player2
+                          ? {
+                              id: Number(currentMatch.player2Id),
+                              username: currentMatch.player2.username,
+                              score: currentMatch.player2Score || 0,
+                            }
+                          : undefined,
+                        currentUserId: Number(this.currentUser?.id),
+                        matchId: currentMatch?.id
+                          ? Number(currentMatch.id)
+                          : undefined,
+                        tournamentId: Number(this.params.id),
+                      }).replace(/'/g, "&apos;")}'
+                    ></tournament-game>
+                  `
+                }
               </div>
               
               <div class="lg:col-span-3 bg-background border border-secondary rounded-lg p-4 order-4 lg:order-3">

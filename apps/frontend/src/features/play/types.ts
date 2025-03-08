@@ -1,12 +1,14 @@
 export interface User {
   id: number;
   username: string;
+  avatar?: string;
 }
 
 export interface Participant {
   userId: number;
   tournamentId: number;
   username: string;
+  avatar?: string;
   user: User;
 }
 
@@ -29,6 +31,7 @@ export interface Tournament {
   creatorId: number;
   status: string;
   maxParticipants?: number;
+  winnerId?: number;
   participants: Participant[];
   matches: Match[];
 }

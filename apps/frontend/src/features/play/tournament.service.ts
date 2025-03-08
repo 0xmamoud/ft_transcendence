@@ -2,6 +2,7 @@ import {
   CreateTournamentDto,
   JoinTournamentDto,
   ITournamentService,
+  Tournament,
 } from "@/features/play/types";
 
 class TournamentService implements ITournamentService {
@@ -35,7 +36,7 @@ class TournamentService implements ITournamentService {
     return responseData;
   }
 
-  async getTournament(id: number) {
+  async getTournament(id: number): Promise<Tournament> {
     const response = await fetch(`/api/tournaments/${id}`, {
       method: "GET",
       headers: {

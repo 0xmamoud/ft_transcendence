@@ -66,17 +66,26 @@ export class MatchService {
   async getTournamentMatches(tournamentId: number) {
     return await this.app.db.match.findMany({
       where: { tournamentId },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        player1Id: true,
+        player2Id: true,
+        player1Score: true,
+        player2Score: true,
+        winnerId: true,
         player1: {
           select: {
             id: true,
             username: true,
+            avatar: true,
           },
         },
         player2: {
           select: {
             id: true,
             username: true,
+            avatar: true,
           },
         },
       },

@@ -117,7 +117,7 @@ export class TournamentService {
     return tournament;
   }
 
-  async finishTournament(tournamentId: number) {
+  async finishTournament(tournamentId: number, winnerId: number) {
     const tournament = await this.app.db.tournament.findUnique({
       where: { id: tournamentId },
     });
@@ -132,7 +132,7 @@ export class TournamentService {
 
     return await this.app.db.tournament.update({
       where: { id: tournamentId },
-      data: { status: "COMPLETED" },
+      data: { status: "COMPLETED", winnerId },
     });
   }
 

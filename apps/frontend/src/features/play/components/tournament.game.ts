@@ -292,7 +292,7 @@ export class TournamentGame extends PropsBaseComponent {
                     player2?.username || "Waiting..."
                   }</span>
                 </div>
-              </div>
+            </div>
               <div class="flex items-center gap-2">
                 ${
                   isPlayer
@@ -301,15 +301,15 @@ export class TournamentGame extends PropsBaseComponent {
                     <span class="font-semibold">Ready: ${
                       this.isReady ? "Yes" : "No"
                     }</span>
-                  </div>
+            </div>
                 `
                     : ""
                 }
                 <div class="bg-gray-800 px-4 py-2 rounded">
                   <span class="font-semibold">Status: ${status}</span>
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
 
             <canvas 
               id="gameCanvas"
@@ -318,7 +318,8 @@ export class TournamentGame extends PropsBaseComponent {
 
             ${
               status === "IN_PROGRESS" && isPlayer && !this.isReady
-                ? `<button id="readyButton" class="btn-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                ? /* html */ `
+                <button id="readyButton" class="btn-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                   Click to Start
                 </button>`
                 : ""
@@ -328,10 +329,11 @@ export class TournamentGame extends PropsBaseComponent {
 
         ${
           isPlayer && status === "IN_PROGRESS"
-            ? `<div class="text-center mt-4">
-              <h2 class="text-xl font-bold mb-4">Controls</h2>
-              <p>Use ↑ and ↓ arrow keys to move your paddle</p>
-            </div>`
+            ? /* html */ `
+              <div class="text-center mt-4">
+                <h2 class="text-xl font-bold mb-4">Controls</h2>
+                <p>Use ↑ and ↓ arrow keys to move your paddle</p>
+              </div>`
             : ""
         }
       </section>

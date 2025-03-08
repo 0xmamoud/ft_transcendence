@@ -3,7 +3,7 @@ import { SocketService } from "#services/socket.service.js";
 import { GameService } from "#services/game.service.js";
 import { TournamentService } from "#services/tournament.service.js";
 import { MatchService } from "#services/match.service.js";
-
+import { FastifyInstance } from "fastify";
 interface TournamentEvents {
   join: { tournamentId: number };
   chat: { tournamentId: number; message: string };
@@ -26,7 +26,8 @@ export class EventHandlerService {
     private readonly socketService: SocketService,
     private readonly gameService: GameService,
     private readonly tournamentService: TournamentService,
-    private readonly matchService: MatchService
+    private readonly matchService: MatchService,
+    private readonly app: FastifyInstance
   ) {
     this.eventHandlers = new Map();
     this.gameLoops = new Map();
@@ -50,9 +51,9 @@ export class EventHandlerService {
       this.handleTournamentStart(socket, data)
     );
 
-    this.eventHandlers.set("tournament:finish", (socket, data) =>
-      this.handleTournamentFinish(socket, data)
-    );
+    // this.eventHandlers.set("tournament:finish", (socket, data) =>
+    //   this.handleTournamentFinish(socket, data)
+    // );
 
     this.eventHandlers.set("match:ready", (socket, data) =>
       this.handleMatchReady(socket, data)
@@ -208,29 +209,57 @@ export class EventHandlerService {
     }
   }
 
-  private handleTournamentFinish(
-    socket: WebSocket,
-    data: TournamentEvents["finish"]
-  ): void {
-    const client = this.socketService.getClient(socket);
-    if (!client) return;
+  private async handleTournamentFinish(tournamentId: number): Promise<void> {
+    const matches = await this.matchService.getTournamentMatches(tournamentId);
 
-    if (!this.socketService.isInRoom(socket, data.tournamentId)) {
-      socket.send(
-        JSON.stringify({
-          event: "error",
-          data: { message: "You are not in this tournament" },
-        })
-      );
-      return;
-    }
+    const allCompleted = matches.every((match) => match.status === "COMPLETED");
+    if (!allCompleted) return;
 
-    this.socketService.broadcastToRoom(data.tournamentId, "tournament:finish", {
-      userId: client.userId,
-      tournamentId: data.tournamentId,
-      message: `Tournament ${data.tournamentId} has finished`,
-      timestamp: new Date().toISOString(),
+    const winCounts = new Map<number, number>();
+    matches.forEach((match) => {
+      if (!match.winnerId) return;
+      winCounts.set(match.winnerId, (winCounts.get(match.winnerId) || 0) + 1);
     });
+
+    let maxWins = 0;
+    let winnerId: number | null = null;
+
+    winCounts.forEach((wins, playerId) => {
+      if (wins > maxWins) {
+        maxWins = wins;
+        winnerId = playerId;
+      }
+    });
+
+    if (winnerId) {
+      const tournament = await this.tournamentService.getTournament(
+        tournamentId
+      );
+      if (!tournament) return;
+
+      const winnerParticipant = tournament.participants.find(
+        (p) => p.userId === winnerId
+      );
+      if (!winnerParticipant) return;
+
+      await this.tournamentService.finishTournament(tournamentId, winnerId);
+      const userAvatar = await this.app.db.user.findUnique({
+        where: { id: winnerId },
+        select: { avatar: true },
+      });
+
+      this.socketService.broadcastToRoom(tournamentId, "tournament:finish", {
+        tournamentId,
+        message: `${winnerParticipant.username} has won the tournament with ${maxWins} victories!`,
+        winner: {
+          id: winnerParticipant.userId,
+          username: winnerParticipant.username,
+          avatar: userAvatar?.avatar || "",
+          totalWins: maxWins,
+        },
+        matches: matches,
+      });
+    }
   }
 
   private async handleMatchReady(
@@ -431,20 +460,9 @@ export class EventHandlerService {
       const nextMatch = await this.matchService.startNextMatch(
         result.tournamentId
       );
-      if (
-        !nextMatch &&
-        (await this.matchService.areAllMatchesCompleted(result.tournamentId))
-      ) {
-        await this.tournamentService.finishTournament(result.tournamentId);
-        const finalMatches = await this.matchService.getTournamentMatches(
-          tournamentId
-        );
 
-        this.socketService.broadcastToRoom(tournamentId, "tournament:finish", {
-          tournamentId,
-          message: "Tournament has been completed",
-          matches: finalMatches,
-        });
+      if (!nextMatch) {
+        await this.handleTournamentFinish(tournamentId);
       }
     } catch (error) {
       console.error("Error ending match:", error);

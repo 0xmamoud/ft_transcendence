@@ -9,6 +9,8 @@ async function userRoutes(app: FastifyInstance) {
   app.addHook("onRequest", app.authenticate);
 
   app.get("/me", userController.getMe);
+  app.put("/me", userController.updateUserProfile);
+  app.get("/me/match-history", userController.getUserMatchHistory);
   app.get("/:id", userController.getUserById);
 }
 

@@ -5,6 +5,10 @@ import jwt from "@fastify/jwt";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
+import staticPlugin from "@fastify/static";
+import path from "node:path";
+
+console.log(process.cwd());
 
 // Configs
 import { envConfig } from "#config/env";
@@ -55,6 +59,12 @@ export async function configureApp() {
   // WebSocket setup
   await app.register(WebSocket);
   // console.log(app.envs);
+
+  // Static files setup
+  app.register(staticPlugin, {
+    root: path.join(process.cwd(), "public"),
+    prefix: "/public/",
+  });
 
   return app;
 }

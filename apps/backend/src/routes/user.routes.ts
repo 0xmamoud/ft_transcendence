@@ -1,10 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { UserController } from "#controllers/user.controller";
 import { UserService } from "#services/user.service";
+import { FileService } from "#services/file.service";
 
 async function userRoutes(app: FastifyInstance) {
   const userService = new UserService(app);
-  const userController = new UserController(userService);
+  const fileService = new FileService();
+  const userController = new UserController(userService, fileService);
 
   app.addHook("onRequest", app.authenticate);
 

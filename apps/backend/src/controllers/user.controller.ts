@@ -1,10 +1,16 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { UserService } from "#services/user.service";
+import { FileService } from "#services/file.service";
 import { JWTPayload } from "#types/auth.type";
 import { UserProfile } from "#types/user.type";
+import fs from "node:fs/promises";
+import path from "path";
 
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly fileService: FileService
+  ) {}
 
   getMe = async (request: FastifyRequest, reply: FastifyReply) => {
     try {
@@ -51,10 +57,47 @@ export class UserController {
         return reply.status(401).send({ message: "Unauthorized" });
       }
 
-      const data = request.body as Partial<UserProfile>;
+      const { username, email, avatar } = request.body as UserProfile;
+
+      if (Buffer.isBuffer(avatar)) {
+        try {
+          const currentUser = await this.userService.getMe(user.userId);
+
+          const avatarPath = await this.fileService.saveAvatar(
+            avatar,
+            user.userId
+          );
+
+          const updatedUser = await this.userService.updateUserProfile(
+            user.userId,
+            {
+              username,
+              email,
+              avatar: avatarPath,
+            }
+          );
+
+          await this.fileService.deleteOldAvatar(currentUser.avatar);
+
+          return reply.status(200).send(updatedUser);
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message.includes("Invalid image format")
+          ) {
+            return reply.status(400).send({ message: error.message });
+          }
+          throw error;
+        }
+      }
+
       const updatedUser = await this.userService.updateUserProfile(
         user.userId,
-        data
+        {
+          username,
+          email,
+          avatar,
+        }
       );
 
       return reply.status(200).send(updatedUser);

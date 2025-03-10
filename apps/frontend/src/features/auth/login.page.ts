@@ -1,7 +1,7 @@
 import { BaseComponent } from "@/core/components";
 import { authService } from "@/features/auth/auth.service";
 import { router } from "@/main";
-import "@/shared/components/error-container";
+import "@/features/shared/components/error-container";
 
 class LoginPage extends BaseComponent {
   private errorContainer: HTMLElement | null = null;

@@ -1,6 +1,6 @@
 import { BaseComponent } from "@/core/components";
 import { tournamentService } from "./tournament.service";
-import "@/shared/components/error-container";
+import "@/features/shared/components/error-container";
 
 class PlayPage extends BaseComponent {
   private createGameError: HTMLElement | null = null;

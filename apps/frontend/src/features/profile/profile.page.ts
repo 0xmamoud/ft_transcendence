@@ -1,70 +1,59 @@
 import { authService } from "@/features/auth/auth.service";
-import { userService } from "@/features/shared/user.service";
 import { BaseComponent } from "@/core/components";
 import { router } from "@/main";
-import { UserProfile } from "../shared/type";
-
+import "@/features/profile/components/match.history.component";
+import "@/features/profile/components/stats.chart.component";
+import "@/features/profile/components/profile.form.component";
+import { userService } from "@/features/shared/user.service";
 class ProfilePage extends BaseComponent {
-  private userProfile: UserProfile | null = null;
-
-  constructor() {
-    super();
-  }
+  private logoutButton: HTMLButtonElement | null = null;
+  private handleLogout = () => {
+    authService.logout().then(() => router.navigateTo("/login"));
+  };
 
   async connectedCallback() {
     try {
-      this.innerHTML = `<div class="loading">Chargement...</div>`;
-
-      this.userProfile = await userService.getUserProfile();
-
+      this.innerHTML = `<div>Loading...</div>`;
+      await userService.getUserProfile();
       this.render();
 
-      this.querySelector(".logout-btn")?.addEventListener(
-        "click",
-        this.handleLogout.bind(this)
-      );
+      this.logoutButton = this.querySelector(".logout-btn");
+      this.logoutButton?.addEventListener("click", this.handleLogout);
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération du profil utilisateur:",
-        error
-      );
+      console.error(error);
       router.navigateTo("/login");
     }
   }
 
   disconnectedCallback() {
-    const logoutBtn = this.querySelector(".logout-btn");
-    if (logoutBtn) {
-      const newBtn = logoutBtn.cloneNode(true);
-      logoutBtn.parentNode?.replaceChild(newBtn, logoutBtn);
-    }
-  }
-
-  async handleLogout() {
-    try {
-      const response = await authService.logout();
-      console.log("logout", response);
-      router.navigateTo("/login");
-    } catch (error) {
-      console.error(error);
-    }
+    this.logoutButton?.removeEventListener("click", this.handleLogout);
   }
 
   render() {
     this.innerHTML = /* html */ `
-      <section class="padding-y">
+      <section class="padding-y container mx-auto">
         <section class="padding-x">
-          <h1>Profile</h1>
-          <div class="user-info">
-            <p>Nom d'utilisateur: ${this.userProfile?.username || "N/A"}</p>
-            <p>Email: ${this.userProfile?.email || "N/A"}</p>
-            <img src="${
-              this.userProfile?.avatar
-            }" alt="Avatar" class="w-10 h-10 rounded-full" />
+          <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Profile page</h1>
+            <button class="btn-secondary logout-btn">Logout</button>
           </div>
-          <button class="btn-primary logout-btn">
-            Logout
-          </button>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-background/50 backdrop-blur rounded-lg border border-secondary p-6">
+              <h2 class="text-2xl font-bold mb-4">Profile Informations</h2>
+              <profile-form></profile-form>
+            </div>
+
+            <div class="bg-background/50 backdrop-blur rounded-lg border border-secondary p-6">
+              <h2 class="text-2xl font-bold mb-4">Statistics</h2>
+              <stats-chart></stats-chart>
+            </div>
+          </div>
+
+          <div class="mt-8 bg-background/50 backdrop-blur rounded-lg border border-secondary p-6">
+            <h2 class="text-2xl font-bold mb-4">Match History</h2>
+            <match-history></match-history>
+          </div>
         </section>
       </section>
     `;

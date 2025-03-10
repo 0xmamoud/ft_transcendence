@@ -35,7 +35,7 @@ class TournamentPage extends ParamsBaseComponent {
   }> = [];
 
   async connectedCallback() {
-    this.innerHTML = `<div class="loading">Chargement...</div>`;
+    this.innerHTML = `<div class="loading">Loading...</div>`;
     super.connectedCallback();
 
     try {

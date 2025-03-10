@@ -1,7 +1,7 @@
 export interface UserPublicProfile {
   id: number;
   username: string;
-  avatar: string | null;
+  avatar: string | null | File;
 }
 
 export interface UserProfile extends UserPublicProfile {

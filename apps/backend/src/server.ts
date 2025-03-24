@@ -5,6 +5,7 @@ import userRoutes from "#routes/user.routes";
 import twoFactorRoutes from "#routes/twoFactor.routes";
 import tournamentRoutes from "#routes/tournament.routes";
 import socketRoutes from "#routes/socket.routes";
+import leaderboardRoutes from "#routes/leaderboard.routes";
 
 import { authMiddleware } from "#middlewares/auth.middleware";
 
@@ -21,6 +22,7 @@ async function start() {
     await app.register(twoFactorRoutes, { prefix: "/2fa" });
     await app.register(tournamentRoutes, { prefix: "/tournaments" });
     await app.register(socketRoutes, { prefix: "/ws" });
+    await app.register(leaderboardRoutes, { prefix: "/leaderboard" });
 
     const address = await app.listen({
       port: app.envs.PORT,

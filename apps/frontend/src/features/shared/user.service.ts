@@ -10,6 +10,7 @@ export interface MatchHistoryItem {
   id: number;
   opponentName: string;
   opponentAvatar: string | null;
+  opponentId: number;
   userScore: number;
   opponentScore: number;
   won: boolean;
@@ -18,6 +19,8 @@ export interface MatchHistoryItem {
 }
 
 export interface MatchHistory {
+  userId: number;
+  username: string;
   matches: MatchHistoryItem[];
   stats: MatchHistoryStats;
 }

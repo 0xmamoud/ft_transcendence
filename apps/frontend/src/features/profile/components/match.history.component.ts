@@ -67,7 +67,9 @@ export class MatchHistoryComponent extends PropsBaseComponent {
                   onerror="this.src='/avatar.jpg'">
               </div>
               <div>
-                <div class="font-medium">${match.opponentName}</div>
+                <a data-link href="/user/${
+                  match.opponentId
+                }" class="font-medium hover:underline">${match.opponentName}</a>
                 <div class="text-xs text-gray-400">${date}</div>
               </div>
             </div>

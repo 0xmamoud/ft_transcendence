@@ -84,6 +84,18 @@ export class UserService {
 
   async getUserMatchHistory(userId: number) {
     try {
+      const user = await this.app.db.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          username: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
       const matches = await this.app.db.match.findMany({
         where: {
           OR: [{ player1Id: userId }, { player2Id: userId }],
@@ -99,12 +111,14 @@ export class UserService {
           createdAt: true,
           player1: {
             select: {
+              id: true,
               username: true,
               avatar: true,
             },
           },
           player2: {
             select: {
+              id: true,
               username: true,
               avatar: true,
             },
@@ -129,18 +143,14 @@ export class UserService {
         const opponentScore = isPlayer1
           ? match.player2Score
           : match.player1Score;
-        const opponentName = isPlayer1
-          ? match.player2.username
-          : match.player1.username;
-        const opponentAvatar = isPlayer1
-          ? match.player2.avatar
-          : match.player1.avatar;
+        const opponent = isPlayer1 ? match.player2 : match.player1;
         const won = match.winnerId === userId;
 
         return {
           id: match.id,
-          opponentName,
-          opponentAvatar,
+          opponentId: opponent.id,
+          opponentName: opponent.username,
+          opponentAvatar: opponent.avatar,
           userScore,
           opponentScore,
           won,
@@ -150,6 +160,8 @@ export class UserService {
       });
 
       return {
+        userId: user.id,
+        username: user.username,
         matches: formattedMatches,
         stats: {
           totalMatches,

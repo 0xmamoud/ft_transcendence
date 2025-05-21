@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 
-import controler from "#controllers/avalanche_controler"
+import controler from "#controllers/avalanche_controler";
 
 export default async function storageRoute(app: FastifyInstance) {
   app.post("/newHistory", controler.storeScore);

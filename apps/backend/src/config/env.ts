@@ -6,6 +6,8 @@ const envSchema = {
     "API_URL",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
+    "CONTRACT_ADDRESS",
+    "PRIVATE_KEY",
   ],
   properties: {
     APP_KEY: {
@@ -31,6 +33,12 @@ const envSchema = {
     GOOGLE_CLIENT_SECRET: {
       type: "string",
     },
+    CONTRACT_ADDRESS: {
+      type: "string",
+    },
+    PRIVATE_KEY: {
+      type: "string",
+    },
   },
 };
 
@@ -50,6 +58,8 @@ declare module "fastify" {
       API_URL: string;
       GOOGLE_CLIENT_ID: string;
       GOOGLE_CLIENT_SECRET: string;
+      CONTRACT_ADDRESS: string;
+      PRIVATE_KEY: string;
     };
   }
 }

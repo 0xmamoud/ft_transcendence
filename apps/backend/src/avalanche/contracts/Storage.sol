@@ -5,8 +5,8 @@ contract Storage {
 	address private	_backend;
 	uint64			TOTALMATCH = 0;
 
-	constructor(address backend) {
-		_backend = backend;
+	constructor() {
+		_backend = msg.sender;
 	}
 
 	struct Game {

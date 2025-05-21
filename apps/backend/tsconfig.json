@@ -22,6 +22,7 @@
       "#routes/*": ["./src/routes/*"],
       "#services/*": ["./src/services/*"],
       "#types/*": ["./src/types/*"],
+      "#avalanche/*":["./src/avalanche/*"],
       "#schemas/*": ["./src/schemas/*"]
     }
   },

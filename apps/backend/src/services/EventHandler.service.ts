@@ -446,9 +446,15 @@ export class EventHandlerService {
         finalScores.player2
       );
 
+      const nextMatch = await this.matchService.startNextMatch(
+        result.tournamentId
+      );
+
       const freshMatches = await this.matchService.getTournamentMatches(
         tournamentId
       );
+      console.log("freshMatches", freshMatches);
+
       this.socketService.broadcastToRoom(tournamentId, "match:end", {
         matchId,
         winnerId,
@@ -456,10 +462,6 @@ export class EventHandlerService {
         player2Score: finalScores.player2,
         matches: freshMatches,
       });
-
-      const nextMatch = await this.matchService.startNextMatch(
-        result.tournamentId
-      );
 
       if (!nextMatch) {
         await this.handleTournamentFinish(tournamentId);

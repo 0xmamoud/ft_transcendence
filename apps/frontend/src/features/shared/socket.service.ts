@@ -2,7 +2,7 @@ import { TournamentSocketEvent } from "@/features/play/tournament.socket.service
 
 export abstract class SocketService {
   private socket: WebSocket | null = null;
-  private eventHandlers: Map<string, (data: any) => void> = new Map();
+  private eventHandlers: Map<string, ((data: any) => void)[]> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout: number | null = null;
@@ -24,16 +24,13 @@ export abstract class SocketService {
           window.location.protocol === "https:" ? "wss:" : "ws:"
         }//${window.location.host}/${this.path}`;
         this.socket = new WebSocket(wsUrl);
-        // console.log("socket", this.socket);
 
         this.socket.onopen = () => {
-          // console.log("WebSocket OPEN - Connection established");
           this.reconnectAttempts = 0;
           resolve();
         };
 
         this.socket.onmessage = (event) => {
-          // console.log("WebSocket MESSAGE received:", event.data);
           try {
             const message: TournamentSocketEvent = JSON.parse(event.data);
             this.handleMessage(message);
@@ -43,11 +40,6 @@ export abstract class SocketService {
         };
 
         this.socket.onclose = (event) => {
-          // console.log("WebSocket CLOSE:", {
-          //   code: event.code,
-          //   reason: event.reason,
-          //   wasClean: event.wasClean,
-          // });
           if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             reject(new Error("Maximum reconnection attempts reached"));
           } else {
@@ -111,11 +103,28 @@ export abstract class SocketService {
   }
 
   on(event: string, callback: (data: any) => void): void {
-    this.eventHandlers.set(event, callback);
+    if (!this.eventHandlers.has(event)) {
+      this.eventHandlers.set(event, []);
+    }
+    this.eventHandlers.get(event)!.push(callback);
   }
 
-  off(event: string): void {
-    this.eventHandlers.delete(event);
+  off(event: string, callback?: (data: any) => void): void {
+    if (!callback) {
+      this.eventHandlers.delete(event);
+      return;
+    }
+
+    const handlers = this.eventHandlers.get(event);
+    if (handlers) {
+      const index = handlers.indexOf(callback);
+      if (index !== -1) {
+        handlers.splice(index, 1);
+      }
+      if (handlers.length === 0) {
+        this.eventHandlers.delete(event);
+      }
+    }
   }
 
   emit(event: string, data: any): void {
@@ -129,12 +138,10 @@ export abstract class SocketService {
 
   private handleMessage(message: TournamentSocketEvent): void {
     const { event, data } = message;
+    const handlers = this.eventHandlers.get(event);
 
-    // console.log(`Received WebSocket event: ${event}`, data);
-
-    const handler = this.eventHandlers.get(event);
-    if (handler) {
-      handler(data);
+    if (handlers) {
+      handlers.forEach((handler) => handler(data));
     }
   }
 }

@@ -236,21 +236,21 @@ class TournamentPage extends ParamsBaseComponent {
       });
     });
 
-    tournamentSocket.on("match:update", (data) => {
-      console.log("Match update received:", data);
+    // tournamentSocket.on("match:update", (data) => {
+    //   console.log("Match update received:", data);
 
-      const gameComponent = this.querySelector("tournament-game") as any;
-      if (
-        gameComponent &&
-        typeof gameComponent.updateGameState === "function"
-      ) {
-        gameComponent.updateGameState(data);
-      } else {
-        console.error(
-          "Game component not found or updateGameState method not available"
-        );
-      }
-    });
+    //   const gameComponent = this.querySelector("tournament-game") as any;
+    //   if (
+    //     gameComponent &&
+    //     typeof gameComponent.updateGameState === "function"
+    //   ) {
+    //     gameComponent.updateGameState(data);
+    //   } else {
+    //     console.error(
+    //       "Game component not found or updateGameState method not available"
+    //     );
+    //   }
+    // });
   }
 
   private cleanupWebSocket() {

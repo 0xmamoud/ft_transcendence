@@ -17,6 +17,7 @@ export class GameService {
   private gameState: GameState | null = null;
   private player1Id: number | null = null;
   private player2Id: number | null = null;
+  private limitScore = 1;
 
   private readonly paddleWidth = 10;
   private readonly paddleHeight = 100;
@@ -142,7 +143,8 @@ export class GameService {
   isGameOver(): boolean {
     return (
       this.gameState !== null &&
-      (this.gameState.scores.player1 >= 5 || this.gameState.scores.player2 >= 5)
+      (this.gameState.scores.player1 >= this.limitScore ||
+        this.gameState.scores.player2 >= this.limitScore)
     );
   }
 

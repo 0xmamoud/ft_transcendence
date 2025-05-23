@@ -209,6 +209,7 @@ export class EventHandlerService {
     }
   }
 
+  // TODO: store matchs on blockchain
   private async handleTournamentFinish(tournamentId: number): Promise<void> {
     const matches = await this.matchService.getTournamentMatches(tournamentId);
 
@@ -260,6 +261,21 @@ export class EventHandlerService {
         matches: matches,
       });
     }
+    // TODO: store matchs on blockchain
+    //call blockchain service, format data and store it
+    /* matchId          
+  tournamentId Int
+  
+  player1Id    Int
+  player2Id    Int
+  
+  player1Score Int        
+  player2Score Int        
+
+  this.matchService.getTournamentMatches(tournamentId)
+  
+  this.blockchainService.storeMatch(matchDataFormatted)
+  */
   }
 
   private async handleMatchReady(

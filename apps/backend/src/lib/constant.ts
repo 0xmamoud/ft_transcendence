@@ -35,6 +35,11 @@ export const CONTRACT_ABI = [
             name: "tournamentId",
             type: "uint64",
           },
+          {
+            internalType: "uint64",
+            name: "matchId",
+            type: "uint64",
+          },
         ],
         internalType: "struct Storage.Game[]",
         name: "",
@@ -96,4 +101,3 @@ export const CONTRACT_ABI = [
     type: "function",
   },
 ];
-

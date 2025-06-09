@@ -22,17 +22,27 @@ const walletClient = createWalletClient({
   transport: http(),
 }).extend(publicActions);
 
-export const getMatchHistory = async (): Promise<MatchHistory[]> => {
-  const matchHistory = await client.readContract({
+// export const getMatchHistory = async (): Promise<MatchHistory[]> => {
+//   const matchHistory = await client.readContract({
+//     address: app.envs.CONTRACT_ADDRESS as `0x${string}`,
+//     abi: CONTRACT_ABI,
+//     functionName: "exploreHistory",
+//   });
+
+//   return matchHistory as MatchHistory[];
+// };
+
+export const getUserMatchHistory = async (playerId: number): Promise<MatchHistory[]> => {
+  const userHistory = await client.readContract({
     address: app.envs.CONTRACT_ADDRESS as `0x${string}`,
     abi: CONTRACT_ABI,
-    functionName: "exploreHistory",
+    functionName: "exploreUserHistory",
+    args: playerId
   });
+  return userHistory as MatchHistory[];
+}
 
-  return matchHistory as MatchHistory[];
-};
-
-export const storeMatchHistory = async (matchs: MatchHistory[]) => {
+export const storeMatchHistory = async (matchs: MatchHistoryItem[]) => {
   
   const { request } = await client.simulateContract({
     address: app.envs.CONTRACT_ADDRESS as `0x${string}`,
@@ -52,4 +62,16 @@ type MatchHistory = {
   player2_id: number;
   tournamentId: number;
   matchId: number;
+};
+
+type MatchHistoryItem = {
+  id: number;
+  opponentName: string;
+  opponentAvatar: string | null;
+  opponentId: number;
+  userScore: number;
+  opponentScore: number;
+  won: boolean;
+  status: string;
+  date: string;
 };

@@ -4,6 +4,8 @@ import { GameService } from "#services/game.service.js";
 import { TournamentService } from "#services/tournament.service.js";
 import { MatchService } from "#services/match.service.js";
 import { FastifyInstance } from "fastify";
+import Avalanche from "#services/blockchain_service.js"
+
 interface TournamentEvents {
   join: { tournamentId: number };
   chat: { tournamentId: number; message: string };
@@ -261,6 +263,7 @@ export class EventHandlerService {
         matches: matches,
       });
     }
+
     // TODO: store matchs on blockchain
     //call blockchain service, format data and store it
     /* matchId          
@@ -273,10 +276,21 @@ export class EventHandlerService {
   player2Score Int        
 
   this.matchService.getTournamentMatches(tournamentId)
-  
   this.blockchainService.storeMatch(matchDataFormatted)
   */
+    const matchDataFormatted = matches.map((match) => {
+      return {
+        player1_score: match.player1Score,
+        player2_score: match.player2Score,
+        player1_id: match.player1Id,
+        player2_id: match.player2Id,
+        tournamentId: tournamentId,
+        matchId: match.id,
+      }
+    })
+    Avalanche.storeMatchHistory(matchDataFormatted)
   }
+
 
   private async handleMatchReady(
     socket: WebSocket,

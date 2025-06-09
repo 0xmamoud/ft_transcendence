@@ -1,5 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { UserProfile, UserPublicProfile } from "#types/user.type";
+import { getMatchHistory } from "./blockchain_service.js";
+import { MatchHistory } from "./blockchain_service.js";
 
 export class UserService {
   constructor(private readonly app: FastifyInstance) {}
@@ -96,6 +98,9 @@ export class UserService {
         throw new Error("User not found");
       }
 
+      const userHistory: MatchHistory[] = await getMatchHistory.getUserMatchHistory(userId)
+      
+
       const matches = await this.app.db.match.findMany({
         where: {
           OR: [{ player1Id: userId }, { player2Id: userId }],
@@ -158,6 +163,27 @@ export class UserService {
           date: match.createdAt,
         };
       });
+
+      // map with userHistory
+      //   const formattedMatches = userHistory.map((match) => {
+      //   const isPlayer1 = match.player1_id === userId;
+      //   const userScore = isPlayer1 ? match.player1_score : match.player2_score;
+      //   const opponentScore = isPlayer1 ? match.player2_score : match.player1_score;
+      //   const opponent = isPlayer1 ? matches.player2 : matches.player1;
+      //   const won = match.player1_score > match.player2_score ? match.player1_id : match.player2_id;
+
+      //   return {
+      //     id: match.matchId,
+      //     opponentId: opponent,
+      //     opponentName: ,
+      //     opponentAvatar: // getAvatar,
+      //     userScore,
+      //     opponentScore,
+      //     won,
+      //     status: //getStatus,
+      //     // date: match.createdAt,
+      //   };
+      // });
 
       return {
         userId: user.id,

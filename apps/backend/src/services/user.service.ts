@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { UserProfile, UserPublicProfile } from "#types/user.type";
-import { getMatchHistory } from "./blockchain_service.js";
-import { MatchHistory } from "./blockchain_service.js";
+import Avalanche from "#services/blockchain_service";
 
 export class UserService {
   constructor(private readonly app: FastifyInstance) {}
@@ -98,92 +97,84 @@ export class UserService {
         throw new Error("User not found");
       }
 
-      const userHistory: MatchHistory[] = await getMatchHistory.getUserMatchHistory(userId)
-      
+      const userHistory = await Avalanche.getUserMatchHistory(userId);
 
-      const matches = await this.app.db.match.findMany({
+      // Si pas d'historique sur la blockchain, retourner un objet vide
+      if (!userHistory || userHistory.length === 0) {
+        return {
+          userId: user.id,
+          username: user.username,
+          matches: [],
+          stats: {
+            totalMatches: 0,
+            wonMatches: 0,
+            winRate: "0.00",
+          },
+        };
+      }
+
+      // Récupérer tous les IDs des opponents uniques
+      const opponentIds = Array.from(
+        new Set(
+          userHistory.map((match) =>
+            match.player1_id === userId ? match.player2_id : match.player1_id
+          )
+        )
+      );
+
+      // Récupérer les informations des opponents depuis la base de données
+      const opponents = await this.app.db.user.findMany({
         where: {
-          OR: [{ player1Id: userId }, { player2Id: userId }],
+          id: { in: opponentIds },
         },
         select: {
           id: true,
-          player1Id: true,
-          player2Id: true,
-          player1Score: true,
-          player2Score: true,
-          winnerId: true,
-          status: true,
-          createdAt: true,
-          player1: {
-            select: {
-              id: true,
-              username: true,
-              avatar: true,
-            },
-          },
-          player2: {
-            select: {
-              id: true,
-              username: true,
-              avatar: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
+          username: true,
+          avatar: true,
         },
       });
 
+      // Créer un map pour un accès rapide aux informations des opponents
+      const opponentMap = new Map(
+        opponents.map((opponent) => [opponent.id, opponent])
+      );
+
       // Calculate statistics
-      const totalMatches = matches.length;
-      const wonMatches = matches.filter(
-        (match) => match.winnerId === userId
-      ).length;
+      const totalMatches = userHistory.length;
+      const wonMatches = userHistory.filter((match) => {
+        if (match.player1_id === userId) {
+          return match.player1_score > match.player2_score;
+        } else {
+          return match.player2_score > match.player1_score;
+        }
+      }).length;
       const winRate = totalMatches > 0 ? (wonMatches / totalMatches) * 100 : 0;
 
-      // Format matches for display
-      const formattedMatches = matches.map((match) => {
-        const isPlayer1 = match.player1Id === userId;
-        const userScore = isPlayer1 ? match.player1Score : match.player2Score;
+      // Format matches for display using userHistory data
+      const formattedMatches = userHistory.map((match) => {
+        const isPlayer1 = match.player1_id === userId;
+        const userScore = isPlayer1 ? match.player1_score : match.player2_score;
         const opponentScore = isPlayer1
-          ? match.player2Score
-          : match.player1Score;
-        const opponent = isPlayer1 ? match.player2 : match.player1;
-        const won = match.winnerId === userId;
+          ? match.player2_score
+          : match.player1_score;
+        const opponentId = isPlayer1 ? match.player2_id : match.player1_id;
+        const opponent = opponentMap.get(opponentId);
+        const won = isPlayer1
+          ? match.player1_score > match.player2_score
+          : match.player2_score > match.player1_score;
 
         return {
-          id: match.id,
-          opponentId: opponent.id,
-          opponentName: opponent.username,
-          opponentAvatar: opponent.avatar,
+          id: match.matchId,
+          opponentId: opponentId,
+          opponentName: opponent?.username || "Unknown",
+          opponentAvatar: opponent?.avatar || null,
           userScore,
           opponentScore,
           won,
-          status: match.status,
-          date: match.createdAt,
+          status: "COMPLETED", // Les matches sur la blockchain sont terminés
+          date: match.date, // Utilise la date depuis les données blockchain
         };
       });
-
-      // map with userHistory
-      //   const formattedMatches = userHistory.map((match) => {
-      //   const isPlayer1 = match.player1_id === userId;
-      //   const userScore = isPlayer1 ? match.player1_score : match.player2_score;
-      //   const opponentScore = isPlayer1 ? match.player2_score : match.player1_score;
-      //   const opponent = isPlayer1 ? matches.player2 : matches.player1;
-      //   const won = match.player1_score > match.player2_score ? match.player1_id : match.player2_id;
-
-      //   return {
-      //     id: match.matchId,
-      //     opponentId: opponent,
-      //     opponentName: ,
-      //     opponentAvatar: // getAvatar,
-      //     userScore,
-      //     opponentScore,
-      //     won,
-      //     status: //getStatus,
-      //     // date: match.createdAt,
-      //   };
-      // });
 
       return {
         userId: user.id,

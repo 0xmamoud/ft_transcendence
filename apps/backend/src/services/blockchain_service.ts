@@ -15,12 +15,15 @@ const client = createPublicClient({
   transport: http(),
 });
 
-const account = privateKeyToAccount(app.envs.PRIVATE_KEY as Address);
-const walletClient = createWalletClient({
-  chain: avalancheFuji,
-  account,
-  transport: http(),
-}).extend(publicActions);
+// Différer la création du wallet client jusqu'à ce qu'on en ait besoin
+const getWalletClient = () => {
+  const account = privateKeyToAccount(app.envs.PRIVATE_KEY as Address);
+  return createWalletClient({
+    chain: avalancheFuji,
+    account,
+    transport: http(),
+  }).extend(publicActions);
+};
 
 // export const getMatchHistory = async (): Promise<MatchHistory[]> => {
 //   const matchHistory = await client.readContract({
@@ -32,23 +35,25 @@ const walletClient = createWalletClient({
 //   return matchHistory as MatchHistory[];
 // };
 
-export const getUserMatchHistory = async (playerId: number): Promise<MatchHistory[]> => {
+const getUserMatchHistory = async (
+  playerId: number
+): Promise<MatchHistory[]> => {
   const userHistory = await client.readContract({
     address: app.envs.CONTRACT_ADDRESS as `0x${string}`,
     abi: CONTRACT_ABI,
     functionName: "exploreUserHistory",
-    args: playerId
+    args: [playerId],
   });
   return userHistory as MatchHistory[];
-}
+};
 
-export const storeMatchHistory = async (matchs: MatchHistoryItem[]) => {
-  
+const storeMatchHistory = async (matchs: MatchHistory[]) => {
+  const walletClient = getWalletClient();
   const { request } = await client.simulateContract({
     address: app.envs.CONTRACT_ADDRESS as `0x${string}`,
     abi: CONTRACT_ABI,
     functionName: "storeScore",
-    account,
+    account: walletClient.account,
     args: matchs,
   });
   const tx = await walletClient.writeContract(request);
@@ -62,16 +67,10 @@ type MatchHistory = {
   player2_id: number;
   tournamentId: number;
   matchId: number;
+  date: string;
 };
 
-type MatchHistoryItem = {
-  id: number;
-  opponentName: string;
-  opponentAvatar: string | null;
-  opponentId: number;
-  userScore: number;
-  opponentScore: number;
-  won: boolean;
-  status: string;
-  date: string;
+export default {
+  getUserMatchHistory,
+  storeMatchHistory,
 };

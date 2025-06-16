@@ -1,10 +1,10 @@
 import { WebSocket } from "ws";
-import { SocketService } from "#services/socket.service.js";
-import { GameService } from "#services/game.service.js";
-import { TournamentService } from "#services/tournament.service.js";
-import { MatchService } from "#services/match.service.js";
+import { SocketService } from "#services/socket.service";
+import { GameService } from "#services/game.service";
+import { TournamentService } from "#services/tournament.service";
+import { MatchService } from "#services/match.service";
 import { FastifyInstance } from "fastify";
-import Avalanche from "#services/blockchain_service.js"
+import Avalanche from "#services/blockchain_service";
 
 interface TournamentEvents {
   join: { tournamentId: number };
@@ -286,11 +286,11 @@ export class EventHandlerService {
         player2_id: match.player2Id,
         tournamentId: tournamentId,
         matchId: match.id,
-      }
-    })
-    Avalanche.storeMatchHistory(matchDataFormatted)
+        date: new Date().toISOString(),
+      };
+    });
+    Avalanche.storeMatchHistory(matchDataFormatted);
   }
-
 
   private async handleMatchReady(
     socket: WebSocket,

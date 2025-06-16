@@ -64,7 +64,8 @@ export class MatchService {
   }
 
   async getTournamentMatches(tournamentId: number) {
-    return await this.app.db.match.findMany({
+    // Récupérer les matches avec les informations de base
+    const matches = await this.app.db.match.findMany({
       where: { tournamentId },
       select: {
         id: true,
@@ -77,19 +78,60 @@ export class MatchService {
         player1: {
           select: {
             id: true,
-            username: true,
             avatar: true,
           },
         },
         player2: {
           select: {
             id: true,
-            username: true,
             avatar: true,
           },
         },
       },
     });
+
+    // Récupérer tous les participants du tournoi avec leurs usernames
+    const participants = await this.app.db.participant.findMany({
+      where: { tournamentId },
+      select: {
+        userId: true,
+        username: true,
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
+    // Créer un map pour accès rapide aux usernames des participants
+    const participantMap = new Map(
+      participants.map((participant) => [
+        participant.userId,
+        participant.username || participant.user.username, // Utilise le username du participant ou celui du user par défaut
+      ])
+    );
+
+    // Formatter les matches avec les usernames des participants
+    return matches.map((match) => ({
+      id: match.id,
+      status: match.status,
+      player1Id: match.player1Id,
+      player2Id: match.player2Id,
+      player1Score: match.player1Score,
+      player2Score: match.player2Score,
+      winnerId: match.winnerId,
+      player1: {
+        id: match.player1.id,
+        username: participantMap.get(match.player1Id) || "Unknown",
+        avatar: match.player1.avatar,
+      },
+      player2: {
+        id: match.player2.id,
+        username: participantMap.get(match.player2Id) || "Unknown",
+        avatar: match.player2.avatar,
+      },
+    }));
   }
 
   async getMatch(matchId: number) {

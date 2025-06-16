@@ -32,7 +32,7 @@ export class TournamentController {
 
   async createTournament(
     request: FastifyRequest<{
-      Body: { name: string };
+      Body: { name: string; username?: string };
       Querystring: CreateTournamentQuery;
     }>,
     reply: FastifyReply
@@ -40,7 +40,8 @@ export class TournamentController {
     try {
       const { name } = request.body;
       const { maxParticipants } = request.query;
-      const username = request.user.username ?? `User_${request.user.userId}`;
+
+      const username = request.body.username ?? request.user.username;
 
       const tournament = await this.tournamentService.createTournament(
         name,
@@ -63,10 +64,7 @@ export class TournamentController {
   ) {
     try {
       const { id } = request.params;
-      const username =
-        request.body.username ??
-        request.user.username ??
-        `User_${request.user.userId}`;
+      const username = request.body.username ?? request.user.username;
 
       const tournament = await this.tournamentService.joinTournament(
         Number(id),

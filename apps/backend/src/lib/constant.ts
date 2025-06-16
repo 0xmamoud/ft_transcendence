@@ -5,8 +5,14 @@ export const CONTRACT_ABI = [
     type: "constructor",
   },
   {
-    inputs: [],
-    name: "exploreHistory",
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "playerId",
+        type: "uint64",
+      },
+    ],
+    name: "explorePlayerHistory",
     outputs: [
       {
         components: [
@@ -40,6 +46,11 @@ export const CONTRACT_ABI = [
             name: "matchId",
             type: "uint64",
           },
+          {
+            internalType: "string",
+            name: "date",
+            type: "string",
+          },
         ],
         internalType: "struct Storage.Game[]",
         name: "",
@@ -50,13 +61,49 @@ export const CONTRACT_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "getOwner",
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "matchHistory",
     outputs: [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
+        internalType: "uint8",
+        name: "player1_score",
+        type: "uint8",
+      },
+      {
+        internalType: "uint8",
+        name: "player2_score",
+        type: "uint8",
+      },
+      {
+        internalType: "uint64",
+        name: "player1_id",
+        type: "uint64",
+      },
+      {
+        internalType: "uint64",
+        name: "player2_id",
+        type: "uint64",
+      },
+      {
+        internalType: "uint64",
+        name: "tournamentId",
+        type: "uint64",
+      },
+      {
+        internalType: "uint64",
+        name: "matchId",
+        type: "uint64",
+      },
+      {
+        internalType: "string",
+        name: "date",
+        type: "string",
       },
     ],
     stateMutability: "view",
@@ -65,34 +112,46 @@ export const CONTRACT_ABI = [
   {
     inputs: [
       {
-        internalType: "uint64",
-        name: "tournamentId",
-        type: "uint64",
-      },
-      {
-        internalType: "uint64[]",
-        name: "matchIdArray",
-        type: "uint64[]",
-      },
-      {
-        internalType: "uint8[]",
-        name: "player1ScoreArray",
-        type: "uint8[]",
-      },
-      {
-        internalType: "uint8[]",
-        name: "player2ScoreArray",
-        type: "uint8[]",
-      },
-      {
-        internalType: "uint64[]",
-        name: "player1IdArray",
-        type: "uint64[]",
-      },
-      {
-        internalType: "uint64[]",
-        name: "player2IdArray",
-        type: "uint64[]",
+        components: [
+          {
+            internalType: "uint8",
+            name: "player1_score",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "player2_score",
+            type: "uint8",
+          },
+          {
+            internalType: "uint64",
+            name: "player1_id",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "player2_id",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "tournamentId",
+            type: "uint64",
+          },
+          {
+            internalType: "uint64",
+            name: "matchId",
+            type: "uint64",
+          },
+          {
+            internalType: "string",
+            name: "date",
+            type: "string",
+          },
+        ],
+        internalType: "struct Storage.Game[]",
+        name: "matches",
+        type: "tuple[]",
       },
     ],
     name: "storeScore",

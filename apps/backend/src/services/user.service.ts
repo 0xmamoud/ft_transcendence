@@ -171,8 +171,8 @@ export class UserService {
           userScore,
           opponentScore,
           won,
-          status: "COMPLETED", // Les matches sur la blockchain sont terminés
-          date: match.date, // Utilise la date depuis les données blockchain
+          status: "COMPLETED",
+          date: match.date,
         };
       });
 

@@ -289,7 +289,8 @@ export class EventHandlerService {
         date: new Date().toISOString(),
       };
     });
-    Avalanche.storeMatchHistory(matchDataFormatted);
+    const tx = await Avalanche.storeMatchHistory(matchDataFormatted);
+    console.log("tx", tx);
   }
 
   private async handleMatchReady(

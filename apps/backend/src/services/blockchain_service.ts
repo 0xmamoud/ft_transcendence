@@ -38,13 +38,24 @@ const getWalletClient = () => {
 const getUserMatchHistory = async (
   playerId: number
 ): Promise<MatchHistory[]> => {
-  const userHistory = await client.readContract({
+  const userHistory = (await client.readContract({
     address: app.envs.CONTRACT_ADDRESS as `0x${string}`,
     abi: CONTRACT_ABI,
-    functionName: "exploreUserHistory",
+    functionName: "explorePlayerHistory",
     args: [playerId],
-  });
-  return userHistory as MatchHistory[];
+  })) as MatchHistory[];
+
+  const formattedHistory = userHistory.map((game: any) => ({
+    player1_score: Number(game.player1_score),
+    player2_score: Number(game.player2_score),
+    player1_id: Number(game.player1_id),
+    player2_id: Number(game.player2_id),
+    tournamentId: Number(game.tournamentId),
+    matchId: Number(game.matchId),
+    date: game.date,
+  }));
+  console.log(formattedHistory);
+  return formattedHistory;
 };
 
 const storeMatchHistory = async (matchs: MatchHistory[]) => {
@@ -54,7 +65,7 @@ const storeMatchHistory = async (matchs: MatchHistory[]) => {
     abi: CONTRACT_ABI,
     functionName: "storeScore",
     account: walletClient.account,
-    args: matchs,
+    args: [matchs],
   });
   const tx = await walletClient.writeContract(request);
   return tx;

@@ -81,6 +81,11 @@ export class TwoFactorService {
       throw new Error("User not found");
     }
 
+    await this.app.db.user.update({
+      where: { id: userId },
+      data: { isOnline: true },
+    });
+
     const accessToken = await this.app.generateAccessToken({
       userId: user.id,
       username: user.username,

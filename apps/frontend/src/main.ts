@@ -85,7 +85,7 @@ const init = () => {
 document.addEventListener("DOMContentLoaded", init);
 
 if (import.meta.hot) {
-  import.meta.hot.accept((newModule) => {
+  import.meta.hot.accept(() => {
     // Forcer le rechargement de la page
     window.location.reload();
   });

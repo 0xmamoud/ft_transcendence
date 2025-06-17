@@ -31,8 +31,8 @@ dev:
 
 prod:
 	@echo "$(BLUE)Démarrage en mode production...$(RESET)"
-	@$(DC) up -d --build
-	@echo "$(GREEN)Les conteneurs sont démarrés en mode production !$(RESET)"
+	@$(DC) up --build
+	@echo "$(GREEN)Les conteneurs sont démarrés en mode production et sont accessible sur http://localhost:3000 !$(RESET)"
 
 down:
 	@echo "$(RED)Arrêt des conteneurs...$(RESET)"

@@ -93,6 +93,7 @@ export class GoogleService {
           email: userInfo.email,
           username,
           avatar: userInfo.picture,
+          isOnline: true,
         },
       });
     }
@@ -105,6 +106,11 @@ export class GoogleService {
     const refreshToken = await this.app.generateRefreshToken({
       userId: user.id,
       username: user.username,
+    });
+
+    await this.app.db.user.update({
+      where: { id: user.id },
+      data: { isOnline: true },
     });
 
     await this.app.db.session.create({

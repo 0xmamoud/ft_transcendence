@@ -208,11 +208,20 @@ export class FriendComponent extends PropsBaseComponent {
                       onerror="this.src='/avatar.jpg'">
                   </div>
                   <div>
-                    <a data-link href="/user/${
-                      friend.id
-                    }" class="font-medium hover:underline">${
+                    <div class="flex items-center gap-2">
+                      <a data-link href="/user/${
+                        friend.id
+                      }" class="font-medium hover:underline">${
                 friend.username
               }</a>
+                      <div class="flex items-center">
+                        <div class="w-2 h-2 rounded-full ${
+                          friend.isOnline ? "bg-green-500" : "bg-red-500"
+                        }" title="${
+                friend.isOnline ? "Online" : "Offline"
+              }"></div>
+                      </div>
+                    </div>
                     <div class="text-xs text-gray-400">Friends since ${joinedDate}</div>
                   </div>
                 </div>

@@ -2,6 +2,7 @@ export interface Friend {
   id: number;
   username: string;
   avatar: string;
+  isOnline: boolean;
 }
 
 interface FriendServiceInterface {

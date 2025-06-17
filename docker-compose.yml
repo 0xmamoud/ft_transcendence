@@ -2,18 +2,17 @@ services:
   frontend:
     build:
       context: ./apps/frontend
-      dockerfile: Dockerfile.prod
     networks:
       - transcendence
     depends_on:
       - backend
     ports:
-      - "3000:3000"
+      - "80:80"
+      - "443:443"
 
   backend:
     build:
       context: ./apps/backend
-      dockerfile: Dockerfile.prod
     env_file:
       - ./apps/backend/.env
     environment:

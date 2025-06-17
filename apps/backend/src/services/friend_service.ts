@@ -28,6 +28,7 @@ export class FriendService {
           id: true,
           username: true,
           avatar: true,
+          isOnline: true,
         },
       });
 

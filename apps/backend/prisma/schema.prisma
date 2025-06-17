@@ -23,6 +23,7 @@ model User {
 
   twoFactorSecret String?    
   isTwoFactorEnabled Boolean  @default(false) 
+  isOnline      Boolean       @default(false)  // Status en ligne/hors ligne
   
   // Tournaments
   createdTournaments Tournament[]

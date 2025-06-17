@@ -27,6 +27,11 @@ export class AuthService {
       };
     }
 
+    await this.app.db.user.update({
+      where: { id: user.id },
+      data: { isOnline: true },
+    });
+
     const accessToken = await this.app.generateAccessToken({
       userId: user.id,
       username: user.username,
@@ -56,6 +61,7 @@ export class AuthService {
         email,
         password: await this.app.hash(password),
         username,
+        isOnline: true,
       },
     });
     const accessToken = await this.app.generateAccessToken({
@@ -93,6 +99,11 @@ export class AuthService {
       if (!session) {
         throw new Error("Session not found");
       }
+
+      await this.app.db.user.update({
+        where: { id: userId },
+        data: { isOnline: false },
+      });
 
       await this.app.db.session.deleteMany({
         where: {

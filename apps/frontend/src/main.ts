@@ -1,15 +1,15 @@
 import "@/style.css";
 import { SparklesCore } from "@/features/shared/particle";
 import Router from "@/core/router";
-import HomePage from "@/features/home/home.page";
-import LeaderboardPage from "@/features/leaderboard/leaderboard.page";
-import ProfilePage from "@/features/profile/profile.page";
-import PlayPage from "@/features/play/play.page";
-import LocalGamePage from "@/features/play/local-game/localGame.page";
-import LoginPage from "@/features/auth/login.page";
-import RegisterPage from "@/features/auth/register.page";
-import TournamentPage from "@/features/play/tournament.page";
-import UserStatsPage from "@/features/leaderboard/user-stats.page";
+import HomePage from "@/features/home/homePage";
+import LeaderboardPage from "@/features/leaderboard/leaderboardPage";
+import ProfilePage from "@/features/profile/profilePage";
+import PlayPage from "@/features/play/playPage";
+import LocalGamePage from "@/features/play/local-game/localGamePage";
+import LoginPage from "@/features/auth/loginPage";
+import RegisterPage from "@/features/auth/registerPage";
+import TournamentPage from "@/features/play/tournamentPage";
+import UserStatsPage from "@/features/leaderboard/userStatsPage";
 
 const routes = [
   { path: "/", component: () => document.createElement("home-page") },

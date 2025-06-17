@@ -1,13 +1,14 @@
 import { configureApp } from "#config/app";
 
-import authRoutes from "#routes/auth.routes";
-import userRoutes from "#routes/user.routes";
-import twoFactorRoutes from "#routes/twoFactor.routes";
-import tournamentRoutes from "#routes/tournament.routes";
-import socketRoutes from "#routes/socket.routes";
-import leaderboardRoutes from "#routes/leaderboard.routes";
+import authRoutes from "#routes/auth_routes";
+import userRoutes from "#routes/user_routes";
+import twoFactorRoutes from "#routes/twoFactor_routes";
+import tournamentRoutes from "#routes/tournament_routes";
+import socketRoutes from "#routes/socket_routes";
+import leaderboardRoutes from "#routes/leaderboard_routes";
+import friendRoutes from "#routes/friend_routes";
 
-import { authMiddleware } from "#middlewares/auth.middleware";
+import { authMiddleware } from "#middlewares/auth_middleware";
 
 async function start() {
   const app = await configureApp();
@@ -23,6 +24,7 @@ async function start() {
     await app.register(tournamentRoutes, { prefix: "/tournaments" });
     await app.register(socketRoutes, { prefix: "/ws" });
     await app.register(leaderboardRoutes, { prefix: "/leaderboard" });
+    await app.register(friendRoutes, { prefix: "/friends" });
 
     const address = await app.listen({
       port: app.envs.PORT,

@@ -7,7 +7,7 @@ import { GoogleService } from "#services/google_service";
 async function authRoutes(app: FastifyInstance) {
   const authService = new AuthService(app);
   const googleService = new GoogleService(app);
-  const authController = new AuthController(authService, googleService);
+  const authController = new AuthController(authService, googleService, app);
 
   app.post("/login", loginSchema, authController.login.bind(authController));
   app.post(

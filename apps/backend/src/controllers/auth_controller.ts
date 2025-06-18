@@ -1,11 +1,13 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { AuthService } from "#services/auth_service";
 import { GoogleService } from "#services/google_service";
+import { FastifyInstance } from "fastify";
 
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly googleService: GoogleService
+    private readonly googleService: GoogleService,
+    private readonly app: FastifyInstance
   ) {}
 
   async login(request: FastifyRequest, reply: FastifyReply) {
@@ -82,7 +84,9 @@ export class AuthController {
       const { code } = request.query as { code: string };
 
       if (!code) {
-        reply.redirect("/login?error=No code provided");
+        reply.redirect(
+          this.app.envs.API_URL + "/api/login?error=No code provided"
+        );
         return;
       }
 
@@ -92,11 +96,12 @@ export class AuthController {
       reply.setCookie("refreshToken", refreshToken);
       reply.setCookie("accessToken", accessToken);
 
-      reply.redirect("/profile");
+      reply.redirect(this.app.envs.API_URL + "/api/profile");
     } catch (error) {
       console.error("Google authentication error:", error);
       reply.redirect(
-        `/login?error=${encodeURIComponent("Authentication failed")}`
+        this.app.envs.API_URL +
+          `/api/login?error=${encodeURIComponent("Authentication failed")}`
       );
     }
   }

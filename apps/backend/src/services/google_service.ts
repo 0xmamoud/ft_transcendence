@@ -12,7 +12,7 @@ export class GoogleService {
   constructor(private readonly app: FastifyInstance) {
     this.clientId = app.envs.GOOGLE_CLIENT_ID;
     this.clientSecret = app.envs.GOOGLE_CLIENT_SECRET;
-    this.redirectUri = `http://localhost:3000/api/auth/google/callback`;
+    this.redirectUri = `${app.envs.API_URL}/api/auth/google/callback`;
   }
 
   generateAuthUrl(): string {

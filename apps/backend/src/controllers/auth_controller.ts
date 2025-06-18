@@ -84,9 +84,7 @@ export class AuthController {
       const { code } = request.query as { code: string };
 
       if (!code) {
-        reply.redirect(
-          this.app.envs.API_URL + "/api/login?error=No code provided"
-        );
+        reply.redirect(this.app.envs.API_URL + "/login?error=No code provided");
         return;
       }
 
@@ -96,12 +94,12 @@ export class AuthController {
       reply.setCookie("refreshToken", refreshToken);
       reply.setCookie("accessToken", accessToken);
 
-      reply.redirect(this.app.envs.API_URL + "/api/profile");
+      reply.redirect(this.app.envs.API_URL + "/profile");
     } catch (error) {
       console.error("Google authentication error:", error);
       reply.redirect(
         this.app.envs.API_URL +
-          `/api/login?error=${encodeURIComponent("Authentication failed")}`
+          `/login?error=${encodeURIComponent("Authentication failed")}`
       );
     }
   }

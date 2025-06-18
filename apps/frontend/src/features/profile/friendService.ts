@@ -22,7 +22,6 @@ export class FriendService implements FriendServiceInterface {
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch friends list");
     }
-    console.log(data);
 
     // Transform backend response to match frontend interface
     return data;

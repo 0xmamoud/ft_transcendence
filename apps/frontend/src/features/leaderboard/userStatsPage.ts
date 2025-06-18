@@ -26,7 +26,6 @@ class UserStatsPage extends ParamsBaseComponent {
       this.render();
       this.renderPieChart();
     } catch (error) {
-      console.error(error);
       router.navigateTo("/login");
     }
   }

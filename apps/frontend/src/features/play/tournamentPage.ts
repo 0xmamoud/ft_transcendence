@@ -47,7 +47,6 @@ class TournamentPage extends ParamsBaseComponent {
 
       this.addEventListener("click", this.handleClick);
     } catch (error) {
-      console.error("Failed to initialize tournament page:", error);
       router.navigateTo("/login");
     }
   }
@@ -109,9 +108,7 @@ class TournamentPage extends ParamsBaseComponent {
           }
         }
       }
-    } catch (error) {
-      console.error("Failed to load tournament:", error);
-    }
+    } catch (error) {}
   }
 
   private async setupWebSocket() {
@@ -154,7 +151,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:start", (data) => {
-      console.log("tournament:start", data);
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -177,8 +173,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("match:end", (data) => {
-      console.log("match:end", data);
-
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",
@@ -195,8 +189,6 @@ class TournamentPage extends ParamsBaseComponent {
     });
 
     tournamentSocket.on("tournament:finish", (data) => {
-      console.log("tournament:finish", data);
-
       this.addChatMessage({
         id: Date.now().toString(),
         username: "System",

@@ -14,7 +14,6 @@ class LeaderboardPage extends BaseComponent {
       this.leaderboard = await leaderboardService.getLeaderboard();
       this.render();
     } catch (error) {
-      console.error(error);
       router.navigateTo("/login");
     }
   }

@@ -124,7 +124,6 @@ export class ProfileFormComponent extends PropsBaseComponent {
     const avatarUrl = this.userProfile?.avatar?.toString().startsWith("http")
       ? this.userProfile.avatar
       : `/api/${this.userProfile?.avatar}`;
-    console.log(avatarUrl);
 
     this.innerHTML = /* html */ `
       <form class="space-y-6">

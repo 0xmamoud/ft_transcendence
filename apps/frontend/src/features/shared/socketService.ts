@@ -23,7 +23,6 @@ export abstract class SocketService {
         const wsUrl = `${
           window.location.protocol === "https:" ? "wss:" : "ws:"
         }//${window.location.host}/${this.path}`;
-        console.log("Connecting to WebSocket:", wsUrl);
         this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {

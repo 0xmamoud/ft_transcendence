@@ -151,7 +151,7 @@ class PlayPage extends BaseComponent {
     try {
       const { id } = await tournamentService.createTournament({
         name,
-        creatorUsername: username,
+        creatorUsername: username || undefined,
         maxParticipants: isGame ? 2 : undefined,
       });
       window.location.href = `/tournament/${id}`;
@@ -176,7 +176,9 @@ class PlayPage extends BaseComponent {
 
     try {
       await tournamentService.joinTournament(Number(gameId), {
-        username: isGame ? undefined : (formData.get("username") as string),
+        username: isGame
+          ? undefined
+          : (formData.get("username") as string) || undefined,
       });
       window.location.href = `/tournament/${gameId}`;
     } catch (error) {

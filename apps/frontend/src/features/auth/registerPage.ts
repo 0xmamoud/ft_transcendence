@@ -91,7 +91,6 @@ class RegisterPage extends BaseComponent {
         this.showTwoFactorForm();
         this.updateQRCode(qrCode);
       } catch (error) {
-        console.error("Error getting QR code:", error);
         router.navigateTo("/profile");
       }
     } catch (error) {

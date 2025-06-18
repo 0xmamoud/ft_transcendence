@@ -54,7 +54,6 @@ const getUserMatchHistory = async (
     matchId: Number(game.matchId),
     date: game.date,
   }));
-  console.log(formattedHistory);
   return formattedHistory;
 };
 

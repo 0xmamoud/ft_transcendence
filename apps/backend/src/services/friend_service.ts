@@ -5,7 +5,6 @@ export class FriendService {
 
   async getFriendsList(userId: number) {
     try {
-      console.log("Ah batard tu stalk ?");
       const friendRelations = await this.app.db.friend.findMany({
         where: {
           userId,
@@ -41,7 +40,6 @@ export class FriendService {
 
   async deleteFriend(userId: number, friendId: number) {
     try {
-      console.log("a batard t'enleve ?");
       return await this.app.db.friend.deleteMany({
         where: {
           userId: userId,
@@ -56,7 +54,6 @@ export class FriendService {
 
   async addFriend(userId: number, username: string) {
     try {
-      console.log("a batard t'ajoute ?");
       const friend = await this.app.db.user.findFirst({
         where: { username },
       });

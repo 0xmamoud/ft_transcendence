@@ -8,7 +8,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly googleService: GoogleService,
     private readonly app: FastifyInstance
-  ) { }
+  ) {}
 
   async login(request: FastifyRequest, reply: FastifyReply) {
     try {
@@ -50,7 +50,7 @@ export class AuthController {
 
       reply.status(200).send({ message: "Registered successfully" });
     } catch (error) {
-      console.error(error)
+      console.error(error);
       reply.status(400).send({ message: "Failed to register" });
     }
   }
@@ -100,7 +100,7 @@ export class AuthController {
       console.error("Google authentication error:", error);
       reply.redirect(
         this.app.envs.API_URL +
-        `/login?error=${encodeURIComponent("Authentication failed")}`
+          `/login?error=${encodeURIComponent("Authentication failed")}`
       );
     }
   }

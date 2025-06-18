@@ -7,8 +7,8 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
 
   backend:
     build:
@@ -19,7 +19,6 @@ services:
       - NODE_ENV=production
     volumes:
       - ./apps/backend/prisma:/app/prisma
-      - ./apps/backend/prisma/dev.db:/app/prisma/dev.db
     networks:
       - transcendence
 

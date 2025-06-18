@@ -17,7 +17,7 @@ class HomePage extends BaseComponent {
           </p>
           <h2 class="text-foreground">Are you ready to take the challenge?</h2>
           <div class="flex items-center gap-4 mt-4">
-            <a href="/tournament" data-link>
+            <a href="/play" data-link>
               <button class="btn-primary">
                 Try it out
               </button>

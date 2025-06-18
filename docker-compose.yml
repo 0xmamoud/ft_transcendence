@@ -21,6 +21,7 @@ services:
       - ./apps/backend/prisma:/app/prisma
     networks:
       - transcendence
+    command: sh -c "npx prisma migrate deploy && npm run start"
 
 networks:
   transcendence:

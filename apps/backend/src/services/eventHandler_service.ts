@@ -456,7 +456,7 @@ export class EventHandlerService {
     if (!gameState) return;
 
     const winnerId =
-      gameState.scores.player1 >= 5
+      gameState.scores.player1 >= 3
         ? this.gameService.getPlayerId(1)
         : this.gameService.getPlayerId(2);
     if (!winnerId) return;

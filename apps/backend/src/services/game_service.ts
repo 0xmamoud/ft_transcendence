@@ -17,11 +17,11 @@ export class GameService {
   private gameState: GameState | null = null;
   private player1Id: number | null = null;
   private player2Id: number | null = null;
-  private limitScore = 1;
+  private limitScore = 3;
 
   private readonly paddleWidth = 10;
   private readonly paddleHeight = 100;
-  private readonly defaultSpeed = 10;
+  private readonly defaultSpeed = 5;
   private readonly canvasWidth = 800;
   private readonly canvasHeight = 600;
   private ballDirectionX = 1;

@@ -58,7 +58,7 @@ export class TournamentController {
       }
       return reply.status(200).send(tournament);
     } catch (error) {
-      return reply.status(500).send({ message: (error as Error).message });
+      return reply.status(401).send({ message: "Tournament already exist" });
     }
   }
 
@@ -72,6 +72,9 @@ export class TournamentController {
     try {
       const { id } = request.params;
       const username = request.body.username ?? request.user.username;
+      if (!id || isNaN(Number(id))) {
+        return reply.status(400).send({ message: "Invalid tournament ID" });
+      }
 
       const tournament = await this.tournamentService.joinTournament(
         Number(id),
@@ -83,7 +86,7 @@ export class TournamentController {
       }
       return reply.status(200).send(tournament);
     } catch (error) {
-      return reply.status(500).send({ message: (error as Error).message });
+      return reply.status(400).send({ message: (error as Error).message });
     }
   }
 
@@ -102,7 +105,7 @@ export class TournamentController {
       }
       return reply.status(200).send(tournament);
     } catch (error) {
-      return reply.status(500).send({ message: (error as Error).message });
+      return reply.status(400).send({ message: (error as Error).message });
     }
   }
 

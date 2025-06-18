@@ -32,7 +32,7 @@ export class LeaderboardController {
       }
       return reply.send(stats);
     } catch (error) {
-      return reply.status(500).send({ error: "Internal Server Error" });
+      return reply.status(404).send({ error: "User not found" });
     }
   };
 }

@@ -21,7 +21,7 @@ export class TwoFactorController {
       });
     } catch (error) {
       console.error("Error generating QR code:", error);
-      reply.status(500).send({ message: "Failed to generate QR code" });
+      reply.status(400).send({ message: "Failed to generate QR code" });
     }
   }
 

@@ -314,7 +314,6 @@ class PlayPage extends BaseComponent {
                           id="creatorUsername"
                           name="creatorUsername"
                           class="w-full p-2 rounded bg-background border border-secondary"
-                          required
                         />
                       </div>
                       <button type="submit" class="btn-primary w-full">Create Tournament</button>
@@ -342,7 +341,6 @@ class PlayPage extends BaseComponent {
                           id="username"
                           name="username"
                           class="w-full p-2 rounded bg-background border border-secondary"
-                          required
                         />
                       </div>
                       <button type="submit" class="btn-primary w-full">Join Tournament</button>
